@@ -1,0 +1,17 @@
+node_modules/
+.expo/
+downloads/
+dist/
+*.log
+.DS_Store
+*.env
+*.env.local
+desktop/node_modules/
+desktop/dist/
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+*.exe
+*.dmg
+*.AppImage
+*.sys
