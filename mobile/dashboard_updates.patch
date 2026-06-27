@@ -1,0 +1,98 @@
+--- /Applications/XAMPP/xamppfiles/htdocs/nad/asmofficeapp/mobile/app/(drawer)/dashboard.tsx
++++ /Applications/XAMPP/xamppfiles/htdocs/nad/asmofficeapp/mobile/app/(drawer)/dashboard.tsx
+@@ -11,6 +11,7 @@
+ import { billingService } from '../../services/billingService';
+ import { useAuthStore } from '../../store/authStore';
+ import { LoadingState, ErrorState } from '../../components/shared/States';
++import { ProjectCard } from '../../components/project/ProjectCard';
+ import { DEPT_COLORS } from '../../constants';
++import { Avatar } from '../../components/ui/Avatar';
++import { Badge } from '../../components/ui/Badge';
++import { formatDate } from '../../utils';
+ 
+ export default function DashboardScreen() {
+@@ -30,6 +31,8 @@
+   const stats   = data?.stats   ?? {};
+   const deptOvw = data?.department_overview ?? [];
+   const active  = data?.active_projects     ?? [];
++  const leaves  = data?.pending_leaves      ?? [];
++  const isFounder = user?.role === 'founder';
++  const isHead = user?.role === 'head';
+ 
+   const handleLogout = () => {
+@@ -113,20 +116,50 @@
+                 <Text style={styles.sectionTitle}>Active Projects</Text>
+-                <TouchableOpacity><Text style={styles.viewAllText}>View all →</Text></TouchableOpacity>
++                <TouchableOpacity onPress={() => navigation.navigate('projects/index' as never)}><Text style={styles.viewAllText}>View all →</Text></TouchableOpacity>
+               </View>
+-              <View style={styles.bottomCard}>
+-                <Text style={styles.emptyText}>No active projects</Text>
+-              </View>
++              {active.length === 0 ? (
++                <View style={styles.bottomCard}>
++                  <Text style={styles.emptyText}>No active projects</Text>
++                </View>
++              ) : (
++                <View style={{ gap: 10 }}>
++                  {active.map((p: any) => <ProjectCard key={p.id} project={p} />)}
++                </View>
++              )}
+             </View>
+ 
+-            <View style={styles.bottomCol}>
+-              <View style={styles.sectionHeader}>
+-                <Text style={styles.sectionTitle}>Pending Leaves</Text>
+-                <TouchableOpacity><Text style={styles.viewAllText}>Manage →</Text></TouchableOpacity>
+-              </View>
+-              <View style={styles.bottomCard}>
+-                <Text style={styles.emptyText}>No pending requests</Text>
+-              </View>
+-            </View>
++            {(isFounder || isHead) && (
++              <View style={styles.bottomCol}>
++                <View style={styles.sectionHeader}>
++                  <Text style={styles.sectionTitle}>Pending Leaves</Text>
++                  <TouchableOpacity onPress={() => navigation.navigate('leaves' as never)}><Text style={styles.viewAllText}>Manage →</Text></TouchableOpacity>
++                </View>
++                {leaves.length === 0 ? (
++                  <View style={styles.bottomCard}>
++                    <Text style={styles.emptyText}>No pending requests</Text>
++                  </View>
++                ) : (
++                  <View style={{ gap: 10 }}>
++                    {leaves.map((l: any) => (
++                      <View key={l.id} style={styles.leaveCard}>
++                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 }}>
++                          <Avatar user={l.user} size="sm" />
++                          <View style={{ flex: 1 }}>
++                            <Text style={styles.leaveName}>{l.user?.name}</Text>
++                            <Text style={styles.leaveDates}>{formatDate(l.start_date)} - {formatDate(l.end_date)}</Text>
++                          </View>
++                          <Badge label="Pending" bg="#fef9c3" text="#ca8a04" />
++                        </View>
++                        <Text style={styles.leaveReason} numberOfLines={2}>"{l.reason}"</Text>
++                      </View>
++                    ))}
++                  </View>
++                )}
++              </View>
++            )}
+           </View>
+         </View>
+@@ -244,4 +277,15 @@
+   },
+   emptyText:    { fontSize: 14, color: '#94a3b8' },
++  leaveCard: {
++    backgroundColor: '#ffffff',
++    borderRadius: 16,
++    padding: 16,
++    shadowColor: '#000',
++    shadowOffset: { width: 0, height: 2 },
++    shadowOpacity: 0.05,
++    shadowRadius: 8,
++    elevation: 3,
++  },
++  leaveName: { fontSize: 14, fontWeight: '700', color: '#1e293b' },
++  leaveDates: { fontSize: 12, color: '#64748b', marginTop: 2 },
++  leaveReason: { fontSize: 13, color: '#475569', fontStyle: 'italic', marginTop: 4 },
+ });

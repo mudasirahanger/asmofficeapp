@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Office Hub",
+    "slug": "officehub",
+    "version": "1.1.7",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "officehub",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.asmoffice.hub"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#6366f1",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      },
+      "package": "com.asmoffice.hub"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-sqlite",
+      "expo-asset",
+      "expo-font",
+      "expo-splash-screen",
+      "expo-web-browser",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Office Hub to use your location to mark attendance."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
