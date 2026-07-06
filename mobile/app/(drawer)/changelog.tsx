@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DrawerActions } from '@react-navigation/routers';
 import { useNavigation } from 'expo-router';
@@ -10,6 +10,7 @@ const CHANGELOG = [
     version: '1.1.9',
     date: '2026-07-06',
     title: 'UI Enhancements & Dark Mode',
+    releaseUrl: 'https://github.com/mudasirahanger/asmofficeapp/releases/tag/v1.1.9',
     changes: [
       'Refactored Project Cards for a cleaner, modern look.',
       'Implemented system-aware Dark Mode across major screens.',
@@ -142,10 +143,19 @@ export default function ChangelogScreen() {
           {CHANGELOG.map((log, idx) => (
             <View key={log.version} style={styles.logEntry}>
               <View style={styles.logHeader}>
-                <View style={styles.versionBadge}>
+                <TouchableOpacity 
+                  activeOpacity={log.releaseUrl ? 0.7 : 1}
+                  onPress={() => log.releaseUrl && Linking.openURL(log.releaseUrl)}
+                  style={styles.versionBadge}
+                >
                   <Text style={styles.versionTxt}>v{log.version}</Text>
-                </View>
+                </TouchableOpacity>
                 <Text style={styles.dateTxt}>{log.date}</Text>
+                {log.releaseUrl && (
+                  <TouchableOpacity onPress={() => Linking.openURL(log.releaseUrl)}>
+                    <Text style={styles.releaseLinkTxt}>View Release 🔗</Text>
+                  </TouchableOpacity>
+                )}
               </View>
               <Card style={styles.card}>
                 <Text style={styles.logTitle}>{log.title}</Text>
@@ -181,6 +191,7 @@ const styles = StyleSheet.create({
   versionBadge: { backgroundColor: '#4f46e5', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   versionTxt: { color: '#fff', fontSize: 13, fontWeight: '700' },
   dateTxt: { color: '#64748b', fontSize: 14, fontWeight: '500' },
+  releaseLinkTxt: { fontSize: 13, color: '#2563eb', fontWeight: '600', marginLeft: 'auto' },
   card: { padding: 20 },
   logTitle: { fontSize: 18, fontWeight: '700', color: '#1e293b', marginBottom: 16 },
   changeList: { gap: 12 },
