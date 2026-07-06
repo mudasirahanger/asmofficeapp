@@ -63,3 +63,7 @@ The output binaries will be placed in the `downloads/` directory at the project 
 - **Electron Version:** We explicitly use Electron `v22.3.27` to maintain compatibility with older OS environments, primarily Windows 8. Do not upgrade to `v24+` unless Windows 8 support is officially dropped.
 - **System Tray:** `main.js` intelligently selects `build/icon.ico` for Windows, and `build/icon.png` for other OS platforms to ensure cross-platform consistency.
 - **Routing:** We use `electron-serve` to intercept the local `app://-` protocol and gracefully serve the static Expo Web assets avoiding `file://` protocol restrictions.
+
+
+- **output** npx expo export -p web --output-dir ../desktop/www
+ 
