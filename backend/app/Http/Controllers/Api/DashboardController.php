@@ -52,7 +52,7 @@ class DashboardController extends Controller
         // Active projects (first 10)
         $activeProjects = Project::visible($user)
             ->whereIn('status', ['assigned', 'in_progress'])
-            ->with(['department', 'assignedTo', 'subAssignedTo'])
+            ->with(['department', 'assignedTo', 'subAssignedTo', 'progressUpdates'])
             ->orderByDesc('updated_at')
             ->limit(10)
             ->get();
@@ -71,7 +71,7 @@ class DashboardController extends Controller
         return response()->json([
             'stats'               => $stats,
             'department_overview' => $departmentOverview,
-            'active_projects'     => $activeProjects,
+            'active_projects'     => \App\Http\Resources\ProjectResource::collection($activeProjects),
             'pending_leaves'      => $pendingLeaves,
         ]);
     }

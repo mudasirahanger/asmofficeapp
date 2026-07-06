@@ -7,6 +7,25 @@ import { Card } from '../../components/ui/Card';
 
 const CHANGELOG = [
   {
+    version: '1.1.9',
+    date: '2026-07-06',
+    title: 'UI Enhancements & Dark Mode',
+    changes: [
+      'Refactored Project Cards for a cleaner, modern look.',
+      'Implemented system-aware Dark Mode across major screens.',
+      'Added swipe-to-complete actions for Project Cards.',
+      'Added smooth animations for Toast notifications and Charts.'
+    ]
+  },
+  {
+    version: '1.1.8',
+    date: '2026-07-01',
+    title: 'Minor Updates',
+    changes: [
+      'Minor bug fixes and UI improvements.'
+    ]
+  },
+  {
     version: '1.1.7',
     date: '2026-06-23',
     title: 'Desktop App & Settings Access',

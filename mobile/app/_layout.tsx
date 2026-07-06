@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import '../global.css';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
@@ -10,6 +11,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Platform } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import { ToastContainer } from '../components/shared/Toast';
+import { useThemeStore } from '../store/themeStore';
+import { useColorScheme } from 'nativewind';
+import { Appearance } from 'react-native';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,12 +65,24 @@ function AuthGuard() {
 }
 
 export default function RootLayout() {
+  const { theme } = useThemeStore();
+  const { setColorScheme } = useColorScheme();
+
+  useEffect(() => {
+    if (theme === 'system') {
+      const colorScheme = Appearance.getColorScheme();
+      setColorScheme(colorScheme || 'light');
+    } else {
+      setColorScheme(theme);
+    }
+  }, [theme]);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: asyncStoragePersister }}>
           <AuthGuard />
-          <StatusBar style="dark" />
+          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="login" />
@@ -79,3 +95,4 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+

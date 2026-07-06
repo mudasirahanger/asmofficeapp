@@ -1,25 +1,34 @@
-import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import React, { useEffect } from 'react';
+import { ViewStyle, StyleProp } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from 'react-native-reanimated';
 
 interface CardProps {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   padding?: number;
+  delay?: number;
 }
 
-export const Card: React.FC<CardProps> = ({ children, style, padding = 16 }) => (
-  <View style={[styles.card, { padding }, style]}>
-    {children}
-  </View>
-);
+export const Card: React.FC<CardProps> = ({ children, style, padding = 16, delay = 0 }) => {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(10);
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    boxShadow: '0px 1px 4px rgba(0,0,0,0.06)',
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-  },
-});
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 400 }));
+    translateY.value = withDelay(delay, withTiming(0, { duration: 400 }));
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return (
+    <Animated.View 
+      style={[{ padding }, animatedStyle, style as any]}
+      className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm"
+    >
+      {children}
+    </Animated.View>
+  );
+};

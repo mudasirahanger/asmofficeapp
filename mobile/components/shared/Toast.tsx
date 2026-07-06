@@ -1,12 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useUIStore } from '../../store/uiStore';
+import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 
 const COLORS_MAP = {
-  success: { bg: '#d1fae5', text: '#065f46', icon: '✅' },
-  error:   { bg: '#fee2e2', text: '#b91c1c', icon: '❌' },
-  warning: { bg: '#fef3c7', text: '#92400e', icon: '⚠️' },
-  info:    { bg: '#dbeafe', text: '#1d4ed8', icon: 'ℹ️' },
+  success: { bg: '#10b981', text: '#ffffff', icon: '✅' },
+  error:   { bg: '#ef4444', text: '#ffffff', icon: '❌' },
+  warning: { bg: '#f59e0b', text: '#ffffff', icon: '⚠️' },
+  info:    { bg: '#3b82f6', text: '#ffffff', icon: 'ℹ️' },
 };
 
 export const ToastContainer: React.FC = () => {
@@ -19,10 +20,15 @@ export const ToastContainer: React.FC = () => {
       {toasts.map((toast) => {
         const c = COLORS_MAP[toast.type];
         return (
-          <View key={toast.id} style={[styles.toast, { backgroundColor: c.bg }]}>
+          <Animated.View
+            key={toast.id}
+            entering={FadeInUp.springify().damping(15)}
+            exiting={FadeOutUp}
+            style={[styles.toast, { backgroundColor: c.bg }]}
+          >
             <Text style={styles.icon}>{c.icon}</Text>
             <Text style={[styles.message, { color: c.text }]}>{toast.message}</Text>
-          </View>
+          </Animated.View>
         );
       })}
     </View>
@@ -32,21 +38,24 @@ export const ToastContainer: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 80,
-    left: 16,
-    right: 16,
+    top: 60,
+    left: 20,
+    right: 20,
     gap: 8,
     zIndex: 9999,
   },
   toast: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    padding: 14,
-    borderRadius: 14,
-    boxShadow: '0px 2px 6px rgba(0,0,0,0.1)',
-    elevation: 5,
+    gap: 12,
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  icon: { fontSize: 16 },
-  message: { fontSize: 13, fontWeight: '600', flex: 1 },
+  icon: { fontSize: 18 },
+  message: { fontSize: 14, fontWeight: '700', flex: 1 },
 });

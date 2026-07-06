@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, Notification, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const serve = require('electron-serve');
+const { autoUpdater } = require('electron-updater');
 
 const loadURL = serve({ directory: 'www' });
 
@@ -35,9 +36,7 @@ function createWindow() {
 }
 
 function createTray() {
-  const isWindows = process.platform === 'win32';
-  const iconFileName = isWindows ? 'icon.ico' : 'icon.png';
-  const iconPath = path.join(__dirname, 'build', iconFileName);
+  const iconPath = path.join(__dirname, 'build', 'icon.png');
   const trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 });
   
   tray = new Tray(trayIcon);
@@ -96,6 +95,33 @@ if (!gotTheLock) {
       });
       
       notification.show();
+    });
+
+    // Auto Updater Setup
+    autoUpdater.autoDownload = false;
+
+    ipcMain.handle('check-for-updates', async () => {
+      autoUpdater.checkForUpdates();
+    });
+
+    ipcMain.handle('download-update', async () => {
+      autoUpdater.downloadUpdate();
+    });
+
+    ipcMain.handle('install-update', async () => {
+      autoUpdater.quitAndInstall(false, true);
+    });
+
+    autoUpdater.on('update-available', (info) => {
+      if (mainWindow) mainWindow.webContents.send('update-available', info);
+    });
+
+    autoUpdater.on('update-downloaded', (info) => {
+      if (mainWindow) mainWindow.webContents.send('update-downloaded', info);
+    });
+
+    autoUpdater.on('error', (err) => {
+      if (mainWindow) mainWindow.webContents.send('update-error', err.toString());
     });
 
     app.on('activate', () => {

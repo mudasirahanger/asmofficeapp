@@ -117,8 +117,8 @@ export default function ProjectDetailScreen() {
   const isFounder = user?.role === 'founder';
   const isHead = user?.role === 'head';
   const isAccounts = user?.role === 'accounts';
-  const canEdit = isFounder || isHead;
   const inDept = isHead && user?.departments?.some((d: any) => d.id === p.department_id);
+  const canEdit = isFounder || inDept;
   const canProgress = isFounder || p.assigned_to === user?.id || p.sub_assigned_to === user?.id || user?.departments?.some((d: any) => d.id === p.department_id);
   const deptMembers = users.filter((u: any) => u.departments?.some((d: any) => d.id === p.department_id) && u.id !== user?.id && u.id !== p.assigned_to);
   const finished = ['completed', 'billed'].includes(p.status);
@@ -185,7 +185,10 @@ export default function ProjectDetailScreen() {
             )}
           </View>
           {canEdit && !finished && (
-            <TouchableOpacity style={styles.editBtn}>
+            <TouchableOpacity 
+              style={styles.editBtn}
+              onPress={() => router.push(`/(drawer)/projects/edit/${projectId}` as any)}
+            >
               <Text style={styles.editTxt}>Edit</Text>
             </TouchableOpacity>
           )}

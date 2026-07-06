@@ -8,9 +8,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
 import { notificationService } from '../../services/notificationService';
 import { Avatar } from '../ui/Avatar';
+import { AppUpdater } from '../shared/AppUpdater';
 
 const NAV_ITEMS = [
   { id: 'dashboard',   route: '/(drawer)/dashboard',       icon: '⊞', label: 'Dashboard',   roles: ['founder', 'head', 'member', 'accounts'] },
+  { id: 'analytics',   route: '/(drawer)/analytics',       icon: '📊', label: 'Analytics',   roles: ['founder', 'hr'] },
   { id: 'projects',    route: '/(drawer)/projects',        icon: '📁', label: 'Projects',    roles: ['founder', 'head', 'member', 'accounts'] },
   { id: 'create_proj', route: '/(drawer)/projects/create', icon: '＋', label: 'New Project', roles: ['founder', 'head'] },
   { id: 'attendance',  route: '/(drawer)/attendance',      icon: '📅', label: 'Attendance',  roles: ['founder', 'head', 'member', 'accounts'] },
@@ -101,12 +103,17 @@ export function DrawerContent(props: DrawerContentComponentProps) {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Text style={styles.brandTitle}>Office Hub</Text>
               <View style={{ backgroundColor: '#1e293b', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                <Text style={{ color: '#94a3b8', fontSize: 10, fontWeight: '700' }}>v1.1.7</Text>
+                <Text style={{ color: '#94a3b8', fontSize: 10, fontWeight: '700' }}>v1.1.9</Text>
               </View>
             </View>
             <Text style={styles.brandSub}>Management System</Text>
           </View>
         </View>
+        {Platform.OS === 'web' && (
+          <View style={{ marginTop: 12 }}>
+            <AppUpdater />
+          </View>
+        )}
       </View>
 
       {/* Nav Links */}

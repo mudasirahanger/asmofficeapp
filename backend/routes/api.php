@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\AnalyticsController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================================
@@ -24,7 +25,7 @@ Route::post('/whitelist-office', [OfficeWhitelistController::class, 'updateIp'])
 // ============================================================
 // Protected Routes (require Sanctum token)
 // ============================================================
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     // Auth
     Route::get('/me',           [AuthController::class, 'me']);
@@ -87,6 +88,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Settings
     Route::get ('/settings', [SettingsController::class, 'index']);
     Route::post('/settings', [SettingsController::class, 'update']);
+
+    // Analytics
+    Route::get ('/analytics', [AnalyticsController::class, 'index']);
 
     // Sync (offline support)
     Route::post ('/sync/push',         [SyncController::class, 'push']);

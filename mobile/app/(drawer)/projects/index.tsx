@@ -10,7 +10,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { projectService } from '../../../services/projectService';
 import { useAuthStore } from '../../../store/authStore';
 import { ProjectCard } from '../../../components/project/ProjectCard';
-import { LoadingState, EmptyState, ErrorState } from '../../../components/shared/States';
+import { SkeletonProjectCard } from '../../../components/ui/Skeleton';
+import { EmptyState, ErrorState } from '../../../components/shared/States';
 import { DEPARTMENTS_SEED } from '../../../constants';
 import { Project } from '../../../types';
 
@@ -49,34 +50,34 @@ export default function ProjectsScreen() {
   const projects: Project[] = data?.data ?? data ?? [];
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
+      <View className="flex-row items-center justify-between px-5 py-4 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-800">
+        <View className="flex-row items-center gap-4 flex-1">
           {!isDesktop && (
-            <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())} style={styles.menuBtn}>
-              <Text style={styles.menuIcon}>☰</Text>
+            <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())} className="p-1">
+              <Text className="text-2xl text-slate-700 dark:text-slate-300">☰</Text>
             </TouchableOpacity>
           )}
-          <Text style={styles.title}>Projects</Text>
+          <Text className="text-[22px] font-extrabold text-slate-900 dark:text-white tracking-tight">Projects</Text>
         </View>
         {canCreate && (
           <TouchableOpacity
             onPress={() => router.push('/(drawer)/projects/create' as any)}
-            style={styles.addBtn}
+            className="bg-indigo-600 rounded-xl px-4 py-2.5 shadow-md shadow-indigo-500/20"
           >
-            <Text style={styles.addBtnText}>＋ New Project</Text>
+            <Text className="text-white text-sm font-bold tracking-wide">＋ New Project</Text>
           </TouchableOpacity>
         )}
       </View>
 
       {/* Filters card */}
-      <View style={styles.filterCard}>
+      <View className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-800 py-4 z-10 shadow-sm shadow-black/5">
         {/* Search */}
-        <View style={styles.searchBox}>
-          <Text style={styles.searchIcon}>🔍</Text>
+        <View className="flex-row items-center gap-2.5 mx-5 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 mb-3">
+          <Text className="text-base dark:text-slate-400">🔍</Text>
           <TextInput
-            style={styles.searchInput}
+            className="flex-1 text-[15px] text-slate-900 dark:text-slate-100 font-medium"
             placeholder="Search projects or clients..."
             placeholderTextColor="#94a3b8"
             value={search}
@@ -91,15 +92,15 @@ export default function ProjectsScreen() {
         </View>
 
         {/* Status chips */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
-          <View style={styles.chips}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="grow-0">
+          <View className="flex-row gap-2 px-5 pb-1">
             {STATUS_FILTERS.map((f) => (
               <TouchableOpacity
                 key={f.value}
                 onPress={() => setStatus(f.value)}
-                style={[styles.chip, status === f.value && styles.chipActive]}
+                className={`px-3.5 py-2 rounded-full border ${status === f.value ? 'bg-indigo-600 border-indigo-600' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
               >
-                <Text style={[styles.chipText, status === f.value && styles.chipTextActive]}>
+                <Text className={`text-[13px] font-semibold ${status === f.value ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>
                   {f.label}
                 </Text>
               </TouchableOpacity>
@@ -109,21 +110,21 @@ export default function ProjectsScreen() {
 
         {/* Department filter — founder only */}
         {isFounder && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
-            <View style={styles.chips}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="grow-0 mt-3">
+            <View className="flex-row gap-2 px-5 pb-1">
               <TouchableOpacity
                 onPress={() => setDept('all')}
-                style={[styles.chip, styles.chipDept, dept === 'all' && styles.chipDeptActive]}
+                className={`px-3.5 py-2 rounded-full border ${dept === 'all' ? 'bg-emerald-500 border-emerald-500' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
               >
-                <Text style={[styles.chipText, dept === 'all' && styles.chipTextActive]}>All Depts</Text>
+                <Text className={`text-[13px] font-semibold ${dept === 'all' ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>All Depts</Text>
               </TouchableOpacity>
               {DEPARTMENTS_SEED.map((d) => (
                 <TouchableOpacity
                   key={d.slug}
                   onPress={() => setDept(d.slug)}
-                  style={[styles.chip, styles.chipDept, dept === d.slug && styles.chipDeptActive]}
+                  className={`px-3.5 py-2 rounded-full border ${dept === d.slug ? 'bg-emerald-500 border-emerald-500' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
                 >
-                  <Text style={[styles.chipText, dept === d.slug && styles.chipTextActive]}>{d.name}</Text>
+                  <Text className={`text-[13px] font-semibold ${dept === d.slug ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>{d.name}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -133,7 +134,11 @@ export default function ProjectsScreen() {
 
       {/* Project list */}
       {isLoading ? (
-        <LoadingState message="Loading projects..." />
+        <ScrollView className="p-4">
+          <SkeletonProjectCard />
+          <SkeletonProjectCard />
+          <SkeletonProjectCard />
+        </ScrollView>
       ) : isError ? (
         <ErrorState onRetry={refetch} />
       ) : projects.length === 0 ? (
@@ -142,7 +147,7 @@ export default function ProjectsScreen() {
         <FlatList
           data={projects}
           keyExtractor={(p) => String(p.id)}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           renderItem={({ item }) => <ProjectCard project={item} />}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
           showsVerticalScrollIndicator={false}
@@ -152,48 +157,4 @@ export default function ProjectsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe:   { flex: 1, backgroundColor: '#f1f5f9' },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12,
-    backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e2e8f0',
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  menuBtn:    { padding: 4 },
-  menuIcon:   { fontSize: 22, color: '#475569' },
-  title:      { fontSize: 18, fontWeight: '700', color: '#1e293b' },
-  addBtn:     { backgroundColor: '#6366f1', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8 },
-  addBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
-
-  filterCard: {
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-    paddingVertical: 10,
-    gap: 8,
-  },
-  searchBox: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginHorizontal: 12, backgroundColor: '#f8fafc',
-    borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0',
-    paddingHorizontal: 12, paddingVertical: 9,
-  },
-  searchIcon:  { fontSize: 14 },
-  searchInput: { flex: 1, fontSize: 14, color: '#1e293b' },
-
-  chipsScroll: { flexGrow: 0 },
-  chips: { flexDirection: 'row', gap: 6, paddingHorizontal: 12, paddingBottom: 2 },
-  chip: {
-    paddingHorizontal: 12, paddingVertical: 6,
-    borderRadius: 999, backgroundColor: '#fff',
-    borderWidth: 1, borderColor: '#e2e8f0',
-  },
-  chipDept: { backgroundColor: '#f8fafc' },
-  chipActive:     { backgroundColor: '#6366f1', borderColor: '#6366f1' },
-  chipDeptActive: { backgroundColor: '#6366f1', borderColor: '#6366f1' },
-  chipText:       { fontSize: 12, fontWeight: '600', color: '#64748b' },
-  chipTextActive: { color: '#fff' },
-
-  list: { padding: 12, paddingBottom: 40 },
-});
+const styles = StyleSheet.create({});

@@ -18,7 +18,7 @@ class ProjectController extends Controller
         $user = $request->user()->load('departments');
 
         $query = Project::visible($user)
-            ->with(['department', 'assignedTo', 'subAssignedTo', 'createdBy'])
+            ->with(['department', 'assignedTo', 'subAssignedTo', 'createdBy', 'progressUpdates'])
             ->orderByDesc('updated_at');
 
         // Filters
@@ -50,7 +50,7 @@ class ProjectController extends Controller
 
         $projects = $query->paginate($request->per_page ?? 50);
 
-        return response()->json($projects);
+        return \App\Http\Resources\ProjectResource::collection($projects);
     }
 
     public function store(Request $request)
@@ -94,7 +94,7 @@ class ProjectController extends Controller
             $this->notifier->projectAssigned($project, $project->assignedTo);
         }
 
-        return response()->json($project, 201);
+        return new \App\Http\Resources\ProjectResource($project);
     }
 
     public function show(Request $request, Project $project)
@@ -108,7 +108,7 @@ class ProjectController extends Controller
         $project->load(['department', 'assignedTo', 'subAssignedTo', 'createdBy', 'progressUpdates.user']);
 
         return response()->json([
-            'project'  => $project,
+            'project'  => new \App\Http\Resources\ProjectResource($project),
             'progress' => $project->progressUpdates,
             'overdue'  => $project->isOverdue(),
             'progress_percentage' => $project->getLatestProgressPercentage(),
@@ -156,7 +156,7 @@ class ProjectController extends Controller
             $this->notifier->projectAssigned($project, $project->assignedTo);
         }
 
-        return response()->json($project);
+        return new \App\Http\Resources\ProjectResource($project);
     }
 
     public function complete(Request $request, Project $project)
@@ -184,7 +184,7 @@ class ProjectController extends Controller
 
         $this->notifier->projectCompleted($project);
 
-        return response()->json($project->fresh(['department', 'assignedTo', 'subAssignedTo', 'createdBy']));
+        return new \App\Http\Resources\ProjectResource($project->fresh(['department', 'assignedTo', 'subAssignedTo', 'createdBy']));
     }
 
     public function markBilled(Request $request, Project $project)
@@ -207,7 +207,7 @@ class ProjectController extends Controller
 
         $this->notifier->projectBilled($project);
 
-        return response()->json($project->fresh(['department', 'assignedTo', 'subAssignedTo', 'createdBy']));
+        return new \App\Http\Resources\ProjectResource($project->fresh(['department', 'assignedTo', 'subAssignedTo', 'createdBy']));
     }
 
     public function changeDeadline(Request $request, Project $project)
@@ -222,7 +222,7 @@ class ProjectController extends Controller
 
         $project->update(['deadline' => $data['deadline'], 'server_version' => $project->server_version + 1]);
 
-        return response()->json($project->fresh(['department', 'assignedTo', 'subAssignedTo']));
+        return new \App\Http\Resources\ProjectResource($project->fresh(['department', 'assignedTo', 'subAssignedTo']));
     }
 
     public function subAssign(Request $request, Project $project)
@@ -243,7 +243,7 @@ class ProjectController extends Controller
             $this->notifier->projectSubAssigned($project, $project->subAssignedTo);
         }
 
-        return response()->json($project->fresh(['department', 'assignedTo', 'subAssignedTo']));
+        return new \App\Http\Resources\ProjectResource($project->fresh(['department', 'assignedTo', 'subAssignedTo']));
     }
 
     private function canView(User $user, Project $project): bool

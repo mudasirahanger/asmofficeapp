@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { billingService } from '../../services/billingService';
 import { useAuthStore } from '../../store/authStore';
 import { LoadingState, ErrorState } from '../../components/shared/States';
+import { AppUpdater } from '../../components/shared/AppUpdater';
 import { DEPT_COLORS } from '../../constants';
 import { ProjectCard } from '../../components/project/ProjectCard';
 import { Avatar } from '../../components/ui/Avatar';
@@ -66,6 +67,7 @@ export default function DashboardScreen() {
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
           </Text>
         </View>
+        <AppUpdater />
       </View>
 
       <ScrollView
