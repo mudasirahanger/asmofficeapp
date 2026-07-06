@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
         // Token-based auth via Sanctum — no CSRF needed
         $middleware->validateCsrfTokens(except: ['api/*']);
     })
