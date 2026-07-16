@@ -73,8 +73,6 @@ export default function SettingsScreen() {
     }
   };
 
-  };
-
   // Removed early return for !hasAccess so all users can see Appearance settings
 
   const handleWhitelistIP = async () => {
