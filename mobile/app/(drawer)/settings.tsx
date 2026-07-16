@@ -120,18 +120,18 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>System Settings</Text>
+      <View className="p-5 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <Text className="text-xl font-bold text-slate-900 dark:text-white">System Settings</Text>
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView className="p-5" contentContainerStyle={{ paddingBottom: 40 }}>
         
         {/* Appearance Settings Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Appearance</Text>
-          <Text style={styles.cardDesc}>Choose how the app looks on your device.</Text>
+        <View className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm">
+          <Text className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Appearance</Text>
+          <Text className="text-sm text-slate-500 dark:text-slate-400 mb-5">Choose how the app looks on your device.</Text>
           
-          <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+          <View className="flex-row gap-2.5 mt-2.5">
             {['system', 'light', 'dark'].map((t) => (
               <TouchableOpacity
                 key={t}
@@ -140,8 +140,9 @@ export default function SettingsScreen() {
                   { flex: 1, paddingVertical: 12, borderRadius: 8, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'center' },
                   theme === t && { backgroundColor: '#0ea5e9', borderColor: '#0ea5e9' }
                 ]}
+                className="dark:border-slate-600"
               >
-                <Text style={{ fontWeight: '600', color: theme === t ? '#fff' : '#475569', textTransform: 'capitalize' }}>
+                <Text style={{ fontWeight: '600', color: theme === t ? '#fff' : (theme === 'dark' ? '#94a3b8' : '#475569'), textTransform: 'capitalize' }}>
                   {t}
                 </Text>
               </TouchableOpacity>
@@ -152,113 +153,113 @@ export default function SettingsScreen() {
         {hasAccess && (
           <>
             {/* Invoice Settings Card */}
-            <View style={[styles.card, { marginTop: 20 }]}>
-          <Text style={styles.cardTitle}>Office & Invoice Settings</Text>
-          <Text style={styles.cardDesc}>Configure details to appear on PDF Invoices.</Text>
+            <View className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm mt-5">
+              <Text className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Office & Invoice Settings</Text>
+              <Text className="text-sm text-slate-500 dark:text-slate-400 mb-5">Configure details to appear on PDF Invoices.</Text>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Office Name</Text>
-            <TextInput style={styles.input} value={settings.officeName} onChangeText={(val) => setSettings({...settings, officeName: val})} placeholder="e.g. Associated Media" />
-          </View>
-          
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
-              <Text style={styles.label}>GSTIN</Text>
-              <TextInput style={styles.input} value={settings.gstin} onChangeText={(val) => setSettings({...settings, gstin: val})} placeholder="e.g. 01AAAAA0000A1Z5" />
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Office Name</Text>
+                <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.officeName} onChangeText={(val) => setSettings({...settings, officeName: val})} placeholder="e.g. Associated Media" />
+              </View>
+              
+              <View className="flex-row justify-between flex-wrap gap-y-4">
+                <View className="mb-4 w-[48%]">
+                  <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">GSTIN</Text>
+                  <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.gstin} onChangeText={(val) => setSettings({...settings, gstin: val})} placeholder="e.g. 01AAAAA0000A1Z5" />
+                </View>
+                <View className="mb-4 w-[48%]">
+                  <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">PAN</Text>
+                  <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.pan} onChangeText={(val) => setSettings({...settings, pan: val})} placeholder="e.g. AAAAA0000A" />
+                </View>
+              </View>
+
+              <View className="flex-row justify-between flex-wrap gap-y-4">
+                <View className="mb-4 w-[48%]">
+                  <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Phone Number</Text>
+                  <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.phone} onChangeText={(val) => setSettings({...settings, phone: val})} placeholder="+91 XXXXXXXXXX" />
+                </View>
+                <View className="mb-4 w-[48%]">
+                  <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Email</Text>
+                  <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.email} onChangeText={(val) => setSettings({...settings, email: val})} placeholder="info@example.com" />
+                </View>
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Website</Text>
+                <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.website} onChangeText={(val) => setSettings({...settings, website: val})} placeholder="www.example.com" />
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Office Address</Text>
+                <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.address} onChangeText={(val) => setSettings({...settings, address: val})} multiline placeholder="Full Office Address" />
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Logo URL</Text>
+                <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.logoUrl} onChangeText={(val) => setSettings({...settings, logoUrl: val})} placeholder="https://example.com/logo.png" />
+              </View>
+
+              <Text className="text-base font-semibold text-slate-900 dark:text-white mt-2.5 mb-2">Bank Details</Text>
+              <View className="flex-row justify-between flex-wrap gap-y-4">
+                <View className="mb-4 w-[48%]">
+                  <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Account Name</Text>
+                  <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.bankAccountName} onChangeText={(val) => setSettings({...settings, bankAccountName: val})} placeholder="Account Name" />
+                </View>
+                <View className="mb-4 w-[48%]">
+                  <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Account Number</Text>
+                  <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.bankAccountNumber} onChangeText={(val) => setSettings({...settings, bankAccountNumber: val})} placeholder="Account Number" />
+                </View>
+              </View>
+              <View className="flex-row justify-between flex-wrap gap-y-4">
+                <View className="mb-4 w-[48%]">
+                  <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">IFSC Code</Text>
+                  <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.bankIfsc} onChangeText={(val) => setSettings({...settings, bankIfsc: val})} placeholder="IFSC" />
+                </View>
+                <View className="mb-4 w-[48%]">
+                  <Text className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Branch</Text>
+                  <TextInput className="border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-700" placeholderTextColor="#94a3b8" value={settings.bankBranch} onChangeText={(val) => setSettings({...settings, bankBranch: val})} placeholder="Branch Name" />
+                </View>
+              </View>
+
+              <TouchableOpacity 
+                className={`bg-sky-500 mt-2.5 py-3 px-6 rounded-lg items-center justify-center ${isSaving ? 'opacity-70' : ''}`}
+                onPress={handleSaveSettings}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text className="text-white text-base font-semibold">Save Settings</Text>
+                )}
+              </TouchableOpacity>
             </View>
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={styles.label}>PAN</Text>
-              <TextInput style={styles.input} value={settings.pan} onChangeText={(val) => setSettings({...settings, pan: val})} placeholder="e.g. AAAAA0000A" />
+
+            {/* WAF Whitelist Card */}
+            <View className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm mt-5">
+              <Text className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Imunify360 IP Whitelist</Text>
+              <Text className="text-sm text-slate-500 dark:text-slate-400 leading-5 mb-5">
+                If you are working from the office and experiencing connection issues or 403 errors, 
+                the office IP might have changed. Click the button below to update the WAF Whitelist.
+              </Text>
+
+              <TouchableOpacity 
+                className={`bg-red-500 py-3 px-6 rounded-lg items-center justify-center ${isUpdating ? 'opacity-70' : ''}`}
+                onPress={handleWhitelistIP}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text className="text-white text-base font-semibold">Sync Office IP</Text>
+                )}
+              </TouchableOpacity>
+
+              {statusMessage ? (
+                <Text className={`mt-4 text-sm font-medium text-center ${statusMessage.includes('Success') ? 'text-emerald-500' : 'text-red-500'}`}>
+                  {statusMessage}
+                </Text>
+              ) : null}
             </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
-              <Text style={styles.label}>Phone Number</Text>
-              <TextInput style={styles.input} value={settings.phone} onChangeText={(val) => setSettings({...settings, phone: val})} placeholder="+91 XXXXXXXXXX" />
-            </View>
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput style={styles.input} value={settings.email} onChangeText={(val) => setSettings({...settings, email: val})} placeholder="info@example.com" />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Website</Text>
-            <TextInput style={styles.input} value={settings.website} onChangeText={(val) => setSettings({...settings, website: val})} placeholder="www.example.com" />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Office Address</Text>
-            <TextInput style={styles.input} value={settings.address} onChangeText={(val) => setSettings({...settings, address: val})} multiline placeholder="Full Office Address" />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Logo URL</Text>
-            <TextInput style={styles.input} value={settings.logoUrl} onChangeText={(val) => setSettings({...settings, logoUrl: val})} placeholder="https://example.com/logo.png" />
-          </View>
-
-          <Text style={[styles.cardTitle, { marginTop: 10, fontSize: 16 }]}>Bank Details</Text>
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
-              <Text style={styles.label}>Account Name</Text>
-              <TextInput style={styles.input} value={settings.bankAccountName} onChangeText={(val) => setSettings({...settings, bankAccountName: val})} placeholder="Account Name" />
-            </View>
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={styles.label}>Account Number</Text>
-              <TextInput style={styles.input} value={settings.bankAccountNumber} onChangeText={(val) => setSettings({...settings, bankAccountNumber: val})} placeholder="Account Number" />
-            </View>
-          </View>
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
-              <Text style={styles.label}>IFSC Code</Text>
-              <TextInput style={styles.input} value={settings.bankIfsc} onChangeText={(val) => setSettings({...settings, bankIfsc: val})} placeholder="IFSC" />
-            </View>
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={styles.label}>Branch</Text>
-              <TextInput style={styles.input} value={settings.bankBranch} onChangeText={(val) => setSettings({...settings, bankBranch: val})} placeholder="Branch Name" />
-            </View>
-          </View>
-
-          <TouchableOpacity 
-            style={[styles.button, { backgroundColor: '#0ea5e9', marginTop: 10 }, isSaving && styles.buttonDisabled]} 
-            onPress={handleSaveSettings}
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Save Settings</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* WAF Whitelist Card */}
-        <View style={[styles.card, { marginTop: 20 }]}>
-          <Text style={styles.cardTitle}>Imunify360 IP Whitelist</Text>
-          <Text style={styles.cardDesc}>
-            If you are working from the office and experiencing connection issues or 403 errors, 
-            the office IP might have changed. Click the button below to update the WAF Whitelist.
-          </Text>
-
-          <TouchableOpacity 
-            style={[styles.button, isUpdating && styles.buttonDisabled]} 
-            onPress={handleWhitelistIP}
-            disabled={isUpdating}
-          >
-            {isUpdating ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Sync Office IP</Text>
-            )}
-          </TouchableOpacity>
-
-          {statusMessage ? (
-            <Text style={[styles.statusText, statusMessage.includes('Success') ? styles.textSuccess : styles.textError]}>
-              {statusMessage}
-            </Text>
-          ) : null}
-        </View>
           </>
         )}
 
@@ -267,97 +268,3 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  header: {
-    padding: 20,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#0f172a',
-  },
-  content: {
-    padding: 20,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    boxShadow: '0px 2px 8px rgba(100, 116, 139, 0.1)',
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#0f172a',
-    marginBottom: 8,
-  },
-  cardDesc: {
-    fontSize: 14,
-    color: '#64748b',
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#475569',
-    marginBottom: 6,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    color: '#0f172a',
-    backgroundColor: '#f8fafc',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  button: {
-    backgroundColor: '#ef4444', 
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  statusText: {
-    marginTop: 16,
-    fontSize: 14,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  textSuccess: {
-    color: '#10b981',
-  },
-  textError: {
-    color: '#ef4444',
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#ef4444',
-    textAlign: 'center',
-    marginTop: 40,
-  }
-});

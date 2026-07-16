@@ -15,3 +15,5 @@ mobile/dist/
 *.dmg
 *.AppImage
 *.sys
+mobile/playwright-report/
+mobile/test-results/

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ViewStyle, StyleProp } from 'react-native';
+import { View, ViewStyle, StyleProp } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from 'react-native-reanimated';
 
 interface CardProps {
@@ -25,11 +25,13 @@ export const Card: React.FC<CardProps> = ({ children, style, className, padding 
   }));
 
   return (
-    <Animated.View 
-      style={[{ padding }, animatedStyle, style as any]}
-      className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm ${className || ''}`}
-    >
-      {children}
+    <Animated.View style={[animatedStyle, style as any]}>
+      <View 
+        style={{ padding }}
+        className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm ${className || ''}`}
+      >
+        {children}
+      </View>
     </Animated.View>
   );
 };
