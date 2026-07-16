@@ -154,7 +154,7 @@ export default function CreateProjectScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.replace('/(drawer)/projects')} style={styles.backBtn}>

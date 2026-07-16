@@ -152,7 +152,7 @@ export default function InvoiceScreen() {
   const project = data?.project;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backTxt}>← Back</Text>

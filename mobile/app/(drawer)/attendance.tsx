@@ -16,7 +16,7 @@ export default function AttendanceScreen() {
   const canManage = isFounder || ['accounts', 'hr', 'reception', 'head'].includes(user?.role || '');
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())} style={styles.menuBtn}>
           <Text style={styles.menuIcon}>☰</Text>

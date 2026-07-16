@@ -50,7 +50,7 @@ export default function DashboardScreen() {
     : { label: 'My Leaves',       value: stats.my_pending_leaves  ?? 0, icon: '🌿', color: '#8b5cf6', iconBg: '#ede9fe' };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
       {/* Header */}
       <View style={styles.header}>
         {!isDesktop && (

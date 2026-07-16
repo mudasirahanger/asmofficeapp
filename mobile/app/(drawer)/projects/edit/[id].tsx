@@ -179,7 +179,7 @@ export default function EditProjectScreen() {
 
   if (loadingProject) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
         <View style={styles.container}>
             <ActivityIndicator size="large" color="#4f46e5" />
         </View>
@@ -188,7 +188,7 @@ export default function EditProjectScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.replace(`/(drawer)/projects/${projectId}`)} style={styles.backBtn}>

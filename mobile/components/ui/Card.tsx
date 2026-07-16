@@ -5,11 +5,12 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } fro
 interface CardProps {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  className?: string;
   padding?: number;
   delay?: number;
 }
 
-export const Card: React.FC<CardProps> = ({ children, style, padding = 16, delay = 0 }) => {
+export const Card: React.FC<CardProps> = ({ children, style, className, padding = 16, delay = 0 }) => {
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(10);
 
@@ -26,7 +27,7 @@ export const Card: React.FC<CardProps> = ({ children, style, padding = 16, delay
   return (
     <Animated.View 
       style={[{ padding }, animatedStyle, style as any]}
-      className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm"
+      className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm ${className || ''}`}
     >
       {children}
     </Animated.View>

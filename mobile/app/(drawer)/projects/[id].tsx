@@ -117,15 +117,15 @@ export default function ProjectDetailScreen() {
   const isFounder = user?.role === 'founder';
   const isHead = user?.role === 'head';
   const isAccounts = user?.role === 'accounts';
-  const inDept = isHead && user?.departments?.some((d: any) => d.id === p.department_id);
+  const inDept = isHead && user?.departments?.some((d: any) => Number(d.id) === Number(p.department_id));
   const canEdit = isFounder || inDept;
-  const canProgress = isFounder || p.assigned_to === user?.id || p.sub_assigned_to === user?.id || user?.departments?.some((d: any) => d.id === p.department_id);
-  const deptMembers = users.filter((u: any) => u.departments?.some((d: any) => d.id === p.department_id) && u.id !== user?.id && u.id !== p.assigned_to);
+  const canProgress = isFounder || Number(p.assigned_to) === Number(user?.id) || Number(p.sub_assigned_to) === Number(user?.id) || user?.departments?.some((d: any) => Number(d.id) === Number(p.department_id));
+  const deptMembers = users.filter((u: any) => u.departments?.some((d: any) => Number(d.id) === Number(p.department_id)) && Number(u.id) !== Number(user?.id) && Number(u.id) !== Number(p.assigned_to));
   const finished = ['completed', 'billed'].includes(p.status);
   const canBill = (isFounder || isAccounts) && p.status === 'completed';
 
   const availableUsers = isFounder
-    ? users.filter((u: any) => u.id !== user?.id && u.id !== p.assigned_to)
+    ? users.filter((u: any) => Number(u.id) !== Number(user?.id) && Number(u.id) !== Number(p.assigned_to))
     : deptMembers;
 
   const handleProgSubmit = () => {
@@ -443,7 +443,7 @@ export default function ProjectDetailScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
       <View style={styles.topNav}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backTxt}>← Projects</Text>

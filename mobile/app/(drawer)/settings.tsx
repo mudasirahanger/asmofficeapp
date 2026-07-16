@@ -4,9 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { useAuthStore } from '../../store/authStore';
 import { settingsService } from '../../services/settingsService';
+import { useThemeStore } from '../../store/themeStore';
 
 export default function SettingsScreen() {
   const { user } = useAuthStore();
+  const { theme, setTheme } = useThemeStore();
   const [isUpdating, setIsUpdating] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   
@@ -71,13 +73,9 @@ export default function SettingsScreen() {
     }
   };
 
-  if (!hasAccess) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>You do not have permission to view this page.</Text>
-      </SafeAreaView>
-    );
-  }
+  };
+
+  // Removed early return for !hasAccess so all users can see Appearance settings
 
   const handleWhitelistIP = async () => {
     setIsUpdating(true);
@@ -116,22 +114,47 @@ export default function SettingsScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900 justify-center items-center">
         <ActivityIndicator size="large" color="#0ea5e9" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
       <View style={styles.header}>
         <Text style={styles.headerTitle}>System Settings</Text>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 40 }}>
         
-        {/* Invoice Settings Card */}
+        {/* Appearance Settings Card */}
         <View style={styles.card}>
+          <Text style={styles.cardTitle}>Appearance</Text>
+          <Text style={styles.cardDesc}>Choose how the app looks on your device.</Text>
+          
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+            {['system', 'light', 'dark'].map((t) => (
+              <TouchableOpacity
+                key={t}
+                onPress={() => setTheme(t as any)}
+                style={[
+                  { flex: 1, paddingVertical: 12, borderRadius: 8, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'center' },
+                  theme === t && { backgroundColor: '#0ea5e9', borderColor: '#0ea5e9' }
+                ]}
+              >
+                <Text style={{ fontWeight: '600', color: theme === t ? '#fff' : '#475569', textTransform: 'capitalize' }}>
+                  {t}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {hasAccess && (
+          <>
+            {/* Invoice Settings Card */}
+            <View style={[styles.card, { marginTop: 20 }]}>
           <Text style={styles.cardTitle}>Office & Invoice Settings</Text>
           <Text style={styles.cardDesc}>Configure details to appear on PDF Invoices.</Text>
 
@@ -238,6 +261,8 @@ export default function SettingsScreen() {
             </Text>
           ) : null}
         </View>
+          </>
+        )}
 
       </ScrollView>
     </SafeAreaView>

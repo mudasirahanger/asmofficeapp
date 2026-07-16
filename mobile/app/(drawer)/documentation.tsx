@@ -18,7 +18,7 @@ export default function DocumentationScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-900">
       <View style={styles.header}>
         <Text style={styles.pageTitle}>App Documentation</Text>
       </View>
