@@ -179,11 +179,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#ef4444',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 8,
+    boxShadow: '0px 4px 8px rgba(239, 68, 68, 0.5)',
   },
   logoChar: {
     color: '#ef4444',

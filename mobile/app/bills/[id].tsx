@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   backTxt: { fontSize: 16, color: '#0ea5e9', fontWeight: '600' },
   headerTitle: { fontSize: 18, fontWeight: '700', color: '#1e293b' },
   scroll: { padding: 16, paddingBottom: 40 },
-  card: { alignSelf: 'center', width: '100%', maxWidth: 900, backgroundColor: '#fff', borderRadius: 12, padding: 20, shadowColor: '#64748b', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 2 },
+  card: { alignSelf: 'center', width: '100%', maxWidth: 900, backgroundColor: '#fff', borderRadius: 12, padding: 20, boxShadow: '0px 2px 8px rgba(100, 116, 139, 0.1)' },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#334155', marginBottom: 16 },
   inputGroup: { marginBottom: 12 },
   label: { fontSize: 13, fontWeight: '500', color: '#475569', marginBottom: 4 },
