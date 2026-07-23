@@ -244,4 +244,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 12,
   },
+
+  // "Get the mobile app" store badges (previously referenced but never
+  // defined here — every element rendered with no styling at all; see
+  // PRODUCTION_AUDIT.md).
+  storeBadgesContainer: { alignItems: 'center', marginTop: 8 },
+  storeBadgesTitle: {
+    color: '#94a3b8',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  storeBadgesRow: { flexDirection: 'row', gap: 10 },
+  storeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#000000',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  storeBadgeTextWrap: { flexDirection: 'column' },
+  storeBadgeSub: { color: '#cbd5e1', fontSize: 9, lineHeight: 11 },
+  storeBadgeMain: { color: '#ffffff', fontSize: 14, fontWeight: '700', lineHeight: 16 },
 });

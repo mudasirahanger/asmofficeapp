@@ -101,7 +101,15 @@ export default function ProjectDetailScreen() {
   
   const status = STATUS_MAP[p.status];
   const priority = PRIORITY_MAP[p.priority];
-  const deptColor = p.department?.color ? DEPT_COLORS[p.department.color] : DEPT_COLORS.slate;
+  // Falls back to slate both when there's no department color AND when the
+  // stored color isn't one of the palette keys DEPT_COLORS defines — the
+  // previous version only handled the first case, so an unrecognized color
+  // value (e.g. old data, a manual DB edit) crashed this screen with
+  // "Cannot read properties of undefined (reading 'badge')" instead of
+  // just rendering a neutral badge. ProjectCard.tsx already had this same
+  // `?? DEPT_COLORS.slate` guard; this screen didn't. Found via the e2e
+  // suite in mobile/e2e/mocked-production-build.spec.ts.
+  const deptColor = p.department?.color ? (DEPT_COLORS[p.department.color] ?? DEPT_COLORS.slate) : DEPT_COLORS.slate;
   
   const overdue = isOverdue(p.deadline, p.status);
   const dlLabel = daysLeftLabel(p.deadline, p.status);

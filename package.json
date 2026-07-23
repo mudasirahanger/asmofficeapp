@@ -2,7 +2,9 @@
   "name": "office-hub",
   "version": "1.1.7",
   "scripts": {
-    "build": "cd mobile && npx expo export && cd ../desktop && rm -rf www && cp -r ../mobile/dist www && npm run build",
-    "start": "cd mobile && npx expo export && cd ../desktop && rm -rf www && cp -r ../mobile/dist www && npm start"
+    "sync-web-build": "node scripts/sync-web-build.js",
+    "build": "cd mobile && npx expo export && cd .. && npm run sync-web-build && cd desktop && npm run build",
+    "start": "cd mobile && npx expo export && cd .. && npm run sync-web-build && cd desktop && npm start",
+    "sync-versions": "node sync-versions.js"
   }
 }

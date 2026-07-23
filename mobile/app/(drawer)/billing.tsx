@@ -134,7 +134,7 @@ export default function BillingScreen() {
                     </View>
                     {billed.map((p: any) => {
                       const u = users.find((x: any) => x.id === p.assigned_to) || p.user;
-                      const dc = p.department?.color ? DEPT_COLORS[p.department.color] : DEPT_COLORS.slate;
+                      const dc = p.department?.color ? (DEPT_COLORS[p.department.color] ?? DEPT_COLORS.slate) : DEPT_COLORS.slate;
                       return (
                         <View key={p.id} style={styles.tr}>
                           <View style={[styles.td, { flex: 2 }]}>
@@ -172,7 +172,7 @@ export default function BillingScreen() {
                     </View>
                     {unbilled.map((p: any) => {
                       const u = users.find((x: any) => x.id === p.assigned_to) || p.user;
-                      const dc = p.department?.color ? DEPT_COLORS[p.department.color] : DEPT_COLORS.slate;
+                      const dc = p.department?.color ? (DEPT_COLORS[p.department.color] ?? DEPT_COLORS.slate) : DEPT_COLORS.slate;
                       return (
                         <View key={p.id} style={styles.tr}>
                           <View style={[styles.td, { flex: 2 }]}>

@@ -1,9 +1,83 @@
-const { app, BrowserWindow, ipcMain, Notification, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification, Tray, Menu, nativeImage, shell } = require('electron');
 const path = require('path');
 const serve = require('electron-serve');
 const { autoUpdater } = require('electron-updater');
 
 const loadURL = serve({ directory: 'www' });
+
+// The packaged app is only ever served from the local app:// protocol via
+// electron-serve. Anything else (http/https links inside the UI, a
+// compromised/injected navigation) must never be allowed to load in-process.
+const ALLOWED_PROTOCOLS = new Set(['app:']);
+
+function isAllowedNavigationTarget(targetUrl) {
+  try {
+    return ALLOWED_PROTOCOLS.has(new URL(targetUrl).protocol);
+  } catch {
+    return false;
+  }
+}
+
+function hardenWindowNavigation(window) {
+  // Block window.open()/target=_blank from spawning new Electron windows.
+  // External http(s) links are handed to the OS's default browser instead.
+  window.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//i.test(url)) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+
+  // Block in-app navigation away from the packaged app:// origin.
+  window.webContents.on('will-navigate', (event, targetUrl) => {
+    if (!isAllowedNavigationTarget(targetUrl)) {
+      event.preventDefault();
+      if (/^https?:\/\//i.test(targetUrl)) {
+        shell.openExternal(targetUrl);
+      }
+    }
+  });
+}
+
+// White-screen diagnostics/recovery (PRODUCTION_AUDIT.md D-16). The app
+// previously had no visibility into, or recovery from, a failed/blank load
+// — a load failure (missing www/index.html from a broken build, a GPU
+// process crash on older/varied Windows hardware, a wedged renderer) just
+// showed an empty window forever with nothing logged anywhere.
+let reloadAttempted = false;
+
+function attachLoadDiagnostics(window) {
+  window.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error(`[main] did-fail-load: ${errorCode} ${errorDescription} (${validatedURL})`);
+    // -3 is Chromium's ERR_ABORTED, usually a benign in-flight navigation
+    // being superseded (e.g. during hardenWindowNavigation's redirects) —
+    // not a real failure, so don't loop-reload on it.
+    if (errorCode !== -3 && !reloadAttempted) {
+      reloadAttempted = true;
+      console.error('[main] Attempting a single automatic reload to recover from the failed load.');
+      window.webContents.reload();
+    }
+  });
+
+  window.webContents.on('did-finish-load', () => {
+    reloadAttempted = false;
+  });
+
+  window.webContents.on('render-process-gone', (event, details) => {
+    console.error('[main] Renderer process gone:', details.reason);
+    if (details.reason !== 'clean-exit') {
+      window.webContents.reload();
+    }
+  });
+
+  window.on('unresponsive', () => {
+    console.error('[main] Window became unresponsive.');
+  });
+
+  window.on('responsive', () => {
+    console.error('[main] Window became responsive again.');
+  });
+}
 
 // Ensure Windows recognizes the AppUserModelId for native notifications
 app.setAppUserModelId('com.officehub.app');
@@ -25,6 +99,8 @@ function createWindow() {
   });
 
   loadURL(mainWindow);
+  hardenWindowNavigation(mainWindow);
+  attachLoadDiagnostics(mainWindow);
 
   // Prevent app from quitting when window is closed, hide it instead
   mainWindow.on('close', (event) => {
@@ -137,3 +213,7 @@ if (!gotTheLock) {
     isQuitting = true;
   });
 }
+
+// Exported for unit testing only (Electron itself ignores module.exports on
+// the entry file, so this has no effect on the packaged app).
+module.exports = { isAllowedNavigationTarget, hardenWindowNavigation, attachLoadDiagnostics };

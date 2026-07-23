@@ -46,12 +46,21 @@ export const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project }) 
 
   const handleComplete = async () => {
     try {
-      await projectService.update(project.id, { status: 'completed' });
-      useUIStore.getState().addToast({ type: 'success', message: `Marked "${project.title}" as completed!` });
+      // Regression fix (PRODUCTION_AUDIT.md): this previously called
+      // projectService.update(id, { status: 'completed' }), but the backend
+      // update() endpoint (a) doesn't accept a 'status' field at all, and
+      // (b) is restricted to Founder/Head roles, so a regular assignee
+      // completing their own project got a 403. The dedicated complete()
+      // endpoint is the one the backend actually authorizes for assignees.
+      await projectService.complete(project.id);
+      useUIStore.getState().showToast(`Marked "${project.title}" as completed!`, 'success');
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
     } catch (e) {
-      useUIStore.getState().addToast({ type: 'error', message: 'Failed to update project' });
+      // Also fixes a crash: the store exposes showToast(message, type),
+      // not addToast({ type, message }) — the old call threw a TypeError
+      // on every completion attempt, success or failure.
+      useUIStore.getState().showToast('Failed to update project', 'error');
     }
   };
 

@@ -59,6 +59,25 @@ class AuthControllerTest extends TestCase
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 
+    public function test_login_is_rate_limited_after_repeated_failures()
+    {
+        // Regression test for D-2: /login previously had no throttle middleware,
+        // allowing unlimited credential-guessing attempts.
+        for ($i = 0; $i < 6; $i++) {
+            $this->postJson('/api/login', [
+                'username' => 'nobody',
+                'password' => 'wrong',
+            ])->assertStatus(422);
+        }
+
+        $response = $this->postJson('/api/login', [
+            'username' => 'nobody',
+            'password' => 'wrong',
+        ]);
+
+        $response->assertStatus(429);
+    }
+
     public function test_register_device_token()
     {
         $user = User::factory()->create();

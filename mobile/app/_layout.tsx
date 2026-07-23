@@ -51,13 +51,44 @@ function AuthGuard() {
   }, [isAuthenticated, isLoading, segments]);
 
   useEffect(() => {
-    // Register Service Worker for PWA (Web Offline Support)
-    if (Platform.OS === 'web' && 'serviceWorker' in navigator) {
+    // Register Service Worker for PWA (Web Offline Support) — browser only.
+    //
+    // Root-caused desktop "white screen after update" reports here: the
+    // Electron desktop app loads this exact same web bundle (Platform.OS
+    // is 'web' inside Electron too), and the old cache-first
+    // service-worker.js permanently cached '/' and '/index.html' the first
+    // time the app ran. index.html references content-hashed JS bundle
+    // filenames that change on every build, so after any update the SW
+    // kept serving the *old* cached index.html, which pointed at a JS
+    // bundle filename that no longer existed on disk -> 404 -> React never
+    // mounted -> white screen. This never needed to run in Electron at
+    // all: electron-serve already reads straight from local disk, so there
+    // is no network to cache against and only downside risk. See
+    // PRODUCTION_AUDIT.md D-16.
+    const isElectron = typeof window !== 'undefined' && !!(window as any).electronAPI;
+
+    if (Platform.OS === 'web' && !isElectron && 'serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').catch(err => {
           console.log('Service Worker registration failed: ', err);
         });
       });
+
+      // Best-effort cleanup: if this bundle was ever loaded inside Electron
+      // before this fix, or a previous browser session registered the SW,
+      // unregister it once from a plain browser tab too isn't necessary —
+      // browsers get the network-first strategy below, which self-heals.
+    } else if (isElectron && 'serviceWorker' in navigator) {
+      // Defensive cleanup for machines that already have the old
+      // cache-poisoning worker registered from a previous install.
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((reg) => reg.unregister());
+      }).catch(() => {});
+      if ('caches' in window) {
+        caches.keys().then((names) => {
+          names.forEach((name) => caches.delete(name));
+        }).catch(() => {});
+      }
     }
   }, []);
 
@@ -71,7 +102,9 @@ export default function RootLayout() {
   useEffect(() => {
     if (theme === 'system') {
       const colorScheme = Appearance.getColorScheme();
-      setColorScheme(colorScheme || 'light');
+      // Appearance.getColorScheme() can report 'unspecified' on some web/
+      // Android environments, which setColorScheme() doesn't accept.
+      setColorScheme(colorScheme === 'dark' ? 'dark' : 'light');
     } else {
       setColorScheme(theme);
     }

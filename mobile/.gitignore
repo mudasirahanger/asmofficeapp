@@ -3,6 +3,11 @@
 # dependencies
 node_modules/
 
+# This project standardizes on pnpm (see package.json "packageManager").
+# Do not commit an npm lockfile — it drifts from the pnpm-managed tree.
+package-lock.json
+yarn.lock
+
 # Expo
 .expo/
 dist/

@@ -1,10 +1,10 @@
 {
   "name": "desktop",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "electron .",
     "build": "electron-builder --mac --win --linux",
     "build:legacy": "bash build-legacy.sh"
@@ -15,7 +15,8 @@
   "type": "commonjs",
   "devDependencies": {
     "electron": "^30.0.0",
-    "electron-builder": "^26.15.3"
+    "electron-builder": "^26.15.3",
+    "jest": "^29.7.0"
   },
   "build": {
     "appId": "com.officehub.app",
@@ -43,7 +44,8 @@
           ]
         }
       ],
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
     },
     "nsis": {
       "createDesktopShortcut": "always",

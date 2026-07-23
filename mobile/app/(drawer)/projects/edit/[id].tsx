@@ -46,7 +46,7 @@ export default function EditProjectScreen() {
     queryFn: () => projectService.get(projectId),
     enabled: !!projectId 
   });
-  const { data: listData } = useQuery({ queryKey: ['projects'], queryFn: projectService.list });
+  const { data: listData } = useQuery({ queryKey: ['projects'], queryFn: () => projectService.list() });
 
   useEffect(() => {
     if (projectDataRes?.project) {

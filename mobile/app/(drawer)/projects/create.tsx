@@ -39,7 +39,7 @@ export default function CreateProjectScreen() {
   // Fetch lists for dropdowns
   const { data: deptData } = useQuery({ queryKey: ['departments'], queryFn: teamService.getDepartments });
   const { data: userData } = useQuery({ queryKey: ['users'], queryFn: teamService.getUsers });
-  const { data: projectData } = useQuery({ queryKey: ['projects'], queryFn: projectService.list });
+  const { data: projectData } = useQuery({ queryKey: ['projects'], queryFn: () => projectService.list() });
 
   const depts = deptData?.departments || [];
   const users = userData?.users || [];

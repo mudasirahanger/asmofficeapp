@@ -17,7 +17,14 @@ export default function DrawerLayout() {
 
   return (
     <Drawer
-      drawerContent={(props) => <DrawerContent {...props} />}
+      // expo-router bundles its own copy of @react-navigation/drawer's types,
+      // which TS treats as structurally distinct from the top-level
+      // @react-navigation/drawer types DrawerContent's props are declared
+      // against (duplicate-package type identity issue, not a real runtime
+      // mismatch — both are the same DrawerNavigationHelpers shape at
+      // runtime). Cast at this single boundary rather than loosening
+      // DrawerContent's own prop types.
+      drawerContent={(props) => <DrawerContent {...(props as any)} />}
       screenOptions={{
         headerShown: false,
         drawerType: isDesktop ? 'permanent' : 'front',

@@ -43,10 +43,14 @@ export default function InvoiceScreen() {
     if (data?.project) {
       let savedData = null;
       try {
-        savedData = typeof data.project.invoice_data === 'string' 
-          ? JSON.parse(data.project.invoice_data) 
+        savedData = typeof data.project.invoice_data === 'string'
+          ? JSON.parse(data.project.invoice_data)
           : data.project.invoice_data;
-      } catch (e) {}
+      } catch (e) {
+        // Corrupted/legacy invoice_data JSON — fall back to defaults below
+        // instead of failing silently (see PRODUCTION_AUDIT.md D-8).
+        console.warn('[bills/[id]] Failed to parse saved invoice_data, using defaults:', e);
+      }
 
       if (savedData && typeof savedData === 'object') {
         setInvoiceData({

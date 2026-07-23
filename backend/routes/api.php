@@ -17,10 +17,13 @@ use Illuminate\Support\Facades\Route;
 // ============================================================
 // Public Auth Routes & Whitelist
 // ============================================================
-Route::post('/login',  [AuthController::class, 'login']);
+// Rate-limited separately from the authenticated group below: these are the
+// only unauthenticated write endpoints, so they are the primary brute-force
+// / abuse targets (login credential guessing, whitelist IP spoofing).
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
 
 use App\Http\Controllers\Api\OfficeWhitelistController;
-Route::post('/whitelist-office', [OfficeWhitelistController::class, 'updateIp']);
+Route::post('/whitelist-office', [OfficeWhitelistController::class, 'updateIp'])->middleware('throttle:6,1');
 
 // ============================================================
 // Protected Routes (require Sanctum token)
