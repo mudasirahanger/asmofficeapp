@@ -105,6 +105,45 @@ test.describe('Production export — mocked API', () => {
     await expect(page.getByText('✅ Mark Complete')).toBeHidden({ timeout: 5000 });
   });
 
+  test('"+ Add New Client Name" reveals a text input to type the new client (D-18 regression)', async ({ page }) => {
+    // Root cause: selecting "new" reset form.client to '', and the text
+    // input's visibility was gated on that exact same "is form.client
+    // unrecognized/non-empty" expression — so the moment 'new' was picked,
+    // the condition flipped back to false and the input never appeared.
+    // Fixed via a dedicated `addingNewClient` boolean instead of overloading
+    // form.client. See app/(drawer)/projects/create.tsx and edit/[id].tsx.
+    await mockCoreApi(page);
+    await page.route('**/api/projects', async (route) => {
+      if (route.request().method() === 'POST') {
+        const body = route.request().postDataJSON();
+        expect(body.client).toBe('Acme Rockets');
+        return route.fulfill({ status: 201, json: { project: { id: 999, ...body } } });
+      }
+      return route.fallback();
+    });
+
+    await page.goto('/');
+    await page.getByPlaceholder(/username/i).first().fill('mudasir');
+    await page.getByPlaceholder(/password/i).first().fill('mudasir123');
+    await page.getByText('Sign In →').first().click();
+    await expect(page.getByText(/active projects|welcome|dashboard/i).first()).toBeVisible({ timeout: 15000 });
+
+    await page.goto('/projects/create');
+
+    const clientSelect = page.locator('select').first();
+    await expect(clientSelect).toBeVisible({ timeout: 10000 });
+    await clientSelect.selectOption('new');
+
+    const newClientInput = page.getByPlaceholder('Enter new client name');
+    await expect(newClientInput).toBeVisible({ timeout: 3000 });
+    await newClientInput.fill('Acme Rockets');
+    await expect(newClientInput).toHaveValue('Acme Rockets');
+
+    // Switching back to an existing client hides the free-text input again.
+    await clientSelect.selectOption({ index: 0 });
+    await expect(newClientInput).toBeHidden({ timeout: 3000 });
+  });
+
   test('refreshing on a nested route does not blank-screen (SPA fallback)', async ({ page }) => {
     await mockCoreApi(page);
     await page.goto('/');

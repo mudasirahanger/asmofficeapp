@@ -149,6 +149,13 @@ This only falls back to `DEPT_COLORS.slate` when `p.department.color` is falsy �
 - Fix: `[id].tsx`'s `deptColor` and both `billing.tsx` call sites now use the same `DEPT_COLORS[color] ?? DEPT_COLORS.slate` guard as `ProjectCard.tsx`.
 - Status: **FIXED and VERIFIED** — confirmed via the real-browser E2E run (see below), not just `tsc`/unit tests.
 
+### D-18 (P1 — Reproducible, user-reported) "+ Add New Client Name" did nothing on the Create/Edit Project screens
+Reported by the user against the live site (`https://office.associatedmedia.org/projects/create`): picking "+ Add New Client Name" from the Client dropdown appeared to do nothing — no way to type a new client's name.
+- Root cause: `app/(drawer)/projects/create.tsx` and `edit/[id].tsx` both computed the select's displayed value **and** the free-text input's visibility from the same expression: `form.client === 'new' || (!uniqueClients.includes(form.client) && form.client !== '')`. Selecting "new" set `form.client` to `''` as a side effect (intending to clear the field for typing). But `''` immediately fails that same expression (`form.client !== ''` is false), so on the very next render both the dropdown's "selected: new" state AND the text input's visibility flipped back off — the UI silently reverted to showing the empty placeholder with no way to enter a name.
+- Fix: introduced a dedicated `addingNewClient` boolean state (independent of `form.client`'s value) in both files to drive the dropdown display and the text-input visibility. `edit/[id].tsx` additionally gets a `clientNeedsFreeText` safety net for the case where a loaded project's own client name isn't present in the aggregate client list.
+- Regression test: `mobile/e2e/mocked-production-build.spec.ts` — `"+ Add New Client Name" reveals a text input to type the new client (D-18 regression)` — run against a real headless Chromium against the actual production `expo export` build.
+- Status: **FIXED and VERIFIED** (real-browser E2E, `tsc --noEmit` clean, full Jest suite green).
+
 ## 4a. Real browser E2E testing (this session)
 
 Per explicit request, this pass went further than static analysis: a real headless Chromium was obtained and run in this sandbox (no GUI, no root/apt), and a new Playwright suite was written and executed against the actual `expo export -p web` production build with the real Laravel API **mocked at the network layer** using response shapes read directly from the backend controllers (not guessed) — see `mobile/e2e/support/mock-api.ts` and `mobile/e2e/mocked-production-build.spec.ts`.
@@ -180,7 +187,7 @@ Per explicit request, a real Electron launch (not just the existing mocked `desk
 | Severity | Count | Fixed | Documented / Deferred |
 |---|---|---|---|
 | P0 | 4 | 4 (D-1, D-13, D-14, D-16) | 0 |
-| P1 | 6 | 6 (D-2, D-3, D-4, D-5, D-6, D-17) | 0 |
+| P1 | 7 | 7 (D-2, D-3, D-4, D-5, D-6, D-17, D-18) | 0 |
 | P2 | 4 | 2 (D-7 unit-level, D-15) | 2 (D-9, D-10) |
 | P3 | 2 | 1 (D-8) | 1 (D-11) |
 

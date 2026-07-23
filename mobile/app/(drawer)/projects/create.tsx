@@ -35,6 +35,7 @@ export default function CreateProjectScreen() {
   const [newDeptName, setNewDeptName] = useState('');
   const [deptError, setDeptError] = useState('');
   const [globalError, setGlobalError] = useState('');
+  const [addingNewClient, setAddingNewClient] = useState(false);
 
   // Fetch lists for dropdowns
   const { data: deptData } = useQuery({ queryKey: ['departments'], queryFn: teamService.getDepartments });
@@ -183,23 +184,26 @@ export default function CreateProjectScreen() {
               <View>
                 {renderSelect(
                   'Client Name',
-                  form.client === 'new' || !uniqueClients.includes(form.client) && form.client !== '' ? 'new' : form.client,
+                  addingNewClient ? 'new' : form.client,
                   (val) => {
                     if (val === 'new') {
+                      setAddingNewClient(true);
                       setForm({ ...form, client: '' });
                     } else {
+                      setAddingNewClient(false);
                       setForm({ ...form, client: val });
                     }
                   },
                   [...uniqueClients.map(c => ({ label: c, value: c })), { label: '+ Add New Client Name', value: 'new' }]
                 )}
-                {(form.client === 'new' || (!uniqueClients.includes(form.client) && form.client !== '')) && (
+                {addingNewClient && (
                   <TextInput
                     style={[styles.input, { marginTop: -8, marginBottom: 16 }]}
                     placeholder="Enter new client name"
                     placeholderTextColor="#94a3b8"
                     value={form.client}
                     onChangeText={(val) => setForm({ ...form, client: val })}
+                    autoFocus
                   />
                 )}
               </View>

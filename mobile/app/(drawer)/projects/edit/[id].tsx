@@ -37,6 +37,7 @@ export default function EditProjectScreen() {
   const [newDeptName, setNewDeptName] = useState('');
   const [deptError, setDeptError] = useState('');
   const [globalError, setGlobalError] = useState('');
+  const [addingNewClient, setAddingNewClient] = useState(false);
 
   // Fetch lists for dropdowns
   const { data: deptData } = useQuery({ queryKey: ['departments'], queryFn: teamService.getDepartments });
@@ -61,6 +62,7 @@ export default function EditProjectScreen() {
         description: p.description || '',
         notes: p.notes || '',
       });
+      setAddingNewClient(false);
     }
   }, [projectDataRes]);
 
@@ -69,6 +71,11 @@ export default function EditProjectScreen() {
   
   const allClients = (listData?.projects || []).map((p: any) => p.client).filter((c: string) => !!c);
   const uniqueClients = Array.from(new Set(allClients)) as string[];
+
+  // Safety net: if the project's own client name isn't in the aggregate list
+  // (e.g. it was the only project for that client and got excluded by a race
+  // on load), still let the user see/edit it via the free-text input.
+  const clientNeedsFreeText = !addingNewClient && !!form.client && !uniqueClients.includes(form.client);
 
   const isFounder = user?.role === 'founder';
   const availableDepts = isFounder ? depts : depts.filter((d: any) => user?.departments?.some((ud: any) => ud.id === d.id));
@@ -217,23 +224,26 @@ export default function EditProjectScreen() {
               <View>
                 {renderSelect(
                   'Client Name',
-                  form.client === 'new' || !uniqueClients.includes(form.client) && form.client !== '' ? 'new' : form.client,
+                  addingNewClient || clientNeedsFreeText ? 'new' : form.client,
                   (val) => {
                     if (val === 'new') {
+                      setAddingNewClient(true);
                       setForm({ ...form, client: '' });
                     } else {
+                      setAddingNewClient(false);
                       setForm({ ...form, client: val });
                     }
                   },
                   [...uniqueClients.map(c => ({ label: c, value: c })), { label: '+ Add New Client Name', value: 'new' }]
                 )}
-                {(form.client === 'new' || (!uniqueClients.includes(form.client) && form.client !== '')) && (
+                {(addingNewClient || clientNeedsFreeText) && (
                   <TextInput
                     style={[styles.input, { marginTop: -8, marginBottom: 16 }]}
                     placeholder="Enter new client name"
                     placeholderTextColor="#94a3b8"
                     value={form.client}
                     onChangeText={(val) => setForm({ ...form, client: val })}
+                    autoFocus
                   />
                 )}
               </View>
