@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\ClientController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================================
@@ -47,6 +48,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::patch ('/projects/{project}/billed',     [ProjectController::class, 'markBilled']);
     Route::patch ('/projects/{project}/deadline',   [ProjectController::class, 'changeDeadline']);
     Route::patch ('/projects/{project}/sub-assign', [ProjectController::class, 'subAssign']);
+
+    // Clients (derived from distinct Project.client values — no separate table)
+    Route::get ('/clients', [ClientController::class, 'index']);
 
     // Progress Updates
     Route::get  ('/projects/{project}/progress', [ProgressController::class, 'index']);

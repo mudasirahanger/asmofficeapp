@@ -95,7 +95,11 @@ export default function TeamScreen() {
 
   const departments = deptsData?.departments ?? [];
   const users = usersData?.users ?? [];
-  const projects = projsData?.projects ?? [];
+  // ProjectController@index returns a paginated Laravel resource collection
+  // ({ data: [...], links, meta }), never a bare `{ projects: [...] }` —
+  // `projsData?.projects` was always undefined, so this list was silently
+  // empty in production (see PRODUCTION_AUDIT.md D-19).
+  const projects = projsData?.data ?? [];
 
   const handleDeptSubmit = () => {
     if (!deptForm.name) return alert('Name required');

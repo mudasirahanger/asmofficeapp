@@ -104,6 +104,24 @@ All **VERIFIED** with actual command output in this session.
 - **Real Laravel backend**: no root for `apt`/PHP; static PHP binary downloads blocked by the same allowlist; the one npm-native-PHP package found (`@platformatic/php-node`) doesn't publish arm64 Linux builds. BLOCKED.
 - Because of the above, `mobile/e2e/auth.spec.ts` and `dashboard.spec.ts` (pre-existing, require a live backend) were still not executed this session.
 
+## Clients feature + D-18/D-19 fixes (2026-07-23, follow-up session)
+
+User-reported bug: "+ Add New Client Name" did nothing on the live site's project create screen. Root-caused and fixed as D-18 (see PRODUCTION_AUDIT.md), then per user request a lightweight "Clients" feature was added (left-menu item, distinct client list with project counts, project create/edit forms now source the full client list from a new `GET /api/clients` endpoint instead of a paginated-and-therefore-incomplete `/projects` fetch). While correcting an E2E mock's response shape to match the real backend for this work, a second, unrelated, previously-undiscovered defect was found and fixed (D-19 — Team screen's project list always empty, wrong response-shape key).
+
+Verified in this sandbox:
+```
+cd mobile && npx tsc --noEmit            # clean, 0 errors
+cd mobile && npx jest --silent           # 4 suites, 17 tests passed
+cd mobile && npx expo export -p web --output-dir dist   # clean build
+# real headless Chromium (see "Real browser E2E" above for how this sandbox got one)
+npx playwright test --config=e2e/mocked.playwright.config.ts --reporter=list
+#  6 passed (D-18 regression test, new Clients-screen test, plus the 4
+#  pre-existing tests in this suite — all still green)
+```
+`backend/tests/Feature/ClientControllerTest.php` was written (3 tests: founder sees aggregated counts across clients, head only sees clients from their own department's projects, unauthenticated request is rejected) but **not executed** — PHP is still unavailable in this sandbox (see "What remains blocked" below). Run `php artisan test --filter=ClientControllerTest` on a real machine before relying on the role-scoping behavior in production.
+
+`desktop/www` was resynced from the fresh `mobile/dist` build so the packaged Electron app also ships this fix once rebuilt.
+
 ## Summary
 
 - **Fixed and verified with actual command output in this session:** D-1 (debug scripts removed), D-3/D-7 (desktop navigation hardening + Jest tests passing), D-5/D-6 (lockfile/cross-platform script — reviewed, not independently re-run beyond the scripts existing correctly), D-8, D-13 (Jest suite unblocked), D-14 (ProjectCard crash fix, verified via clean `tsc`+`jest`), D-15 (all 31 tsc errors resolved to 0).

@@ -45,6 +45,18 @@ export const ACTIVE_PROJECT = {
   progressUpdates: [{ id: 1, percentage: 40, text: 'In progress', created_at: '2026-07-20T00:00:00.000000Z' }],
 };
 
+export const CLIENT_SUMMARIES = [
+  {
+    name: 'Internal',
+    total_projects: 1,
+    active_projects: 1,
+    completed_projects: 0,
+    billed_projects: 0,
+    overdue_projects: 0,
+    last_activity: '2026-07-20T00:00:00.000000Z',
+  },
+];
+
 async function json(route: Route, body: unknown, status = 200) {
   await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
 }
@@ -90,9 +102,30 @@ export async function mockCoreApi(page: Page, opts: { loginShouldFail?: boolean 
   await page.route('**/api/users', (route) => json(route, [FOUNDER_USER]));
   await page.route('**/api/departments', (route) => json(route, [{ id: 1, name: 'Engineering' }]));
 
-  await page.route('**/api/projects', (route) => {
+  // ClientController@index (backend/app/Http/Controllers/Api/ClientController.php)
+  // — { clients: [...] }, one entry per distinct Project.client value.
+  await page.route('**/api/clients', (route) => json(route, { clients: CLIENT_SUMMARIES }));
+
+  // Regex, not a glob string: the Projects list screen calls this with
+  // ?status=&dept=&search= query params (e.g. when arriving pre-filtered
+  // from the Clients screen), and a plain '**/api/projects' glob does not
+  // match a URL with a trailing query string. The `$` anchor after the
+  // optional query also keeps this from accidentally shadowing
+  // /api/projects/{id} routes registered below.
+  await page.route(/\/api\/projects(\?[^/]*)?$/, (route) => {
     if (route.request().method() === 'GET') {
-      return json(route, { projects: [ACTIVE_PROJECT] });
+      // ProjectController@index returns ProjectResource::collection() over a
+      // paginated query — Laravel's AnonymousResourceCollection wraps that as
+      // { data: [...], links: {...}, meta: {...} }, not a bare
+      // { projects: [...] }. mobile/app/(drawer)/projects/index.tsx reads
+      // `data?.data`, so this mock must match that shape or the list screen
+      // silently renders empty (see PRODUCTION_AUDIT.md D-19, found via this
+      // exact mismatch).
+      return json(route, {
+        data: [ACTIVE_PROJECT],
+        links: { first: null, last: null, prev: null, next: null },
+        meta: { current_page: 1, last_page: 1, per_page: 50, total: 1 },
+      });
     }
     return route.continue();
   });

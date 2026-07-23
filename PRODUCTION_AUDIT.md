@@ -156,6 +156,12 @@ Reported by the user against the live site (`https://office.associatedmedia.org/
 - Regression test: `mobile/e2e/mocked-production-build.spec.ts` — `"+ Add New Client Name" reveals a text input to type the new client (D-18 regression)` — run against a real headless Chromium against the actual production `expo export` build.
 - Status: **FIXED and VERIFIED** (real-browser E2E, `tsc --noEmit` clean, full Jest suite green).
 
+### D-19 (P2 — Silent empty state, found while adding the Clients feature) Team screen's project list always empty
+`mobile/app/(drawer)/team.tsx:98` read `projsData?.projects ?? []`, but `projectService.list()` calls `GET /projects`, whose controller (`ProjectController::index`) returns a **paginated** Laravel resource collection (`ProjectResource::collection($projects->paginate(...))`), which Laravel automatically wraps as `{ data: [...], links: {...}, meta: {...} }` — there is no `projects` key anywhere in that response. `projsData?.projects` was therefore always `undefined`, silently falling back to `[]`. No crash, no error — the Team screen's project-related stats/list have simply always rendered as if there were zero projects, in every environment.
+- Found while building the new "Clients" feature (see below): a Playwright mock for `/api/projects` had to be corrected from a plausible-looking-but-wrong `{ projects: [...] }` shape to the real `{ data: [...], links, meta }` shape, which is when the same wrong-key pattern was spotted in `team.tsx`.
+- Fix: `const projects = projsData?.data ?? [];`.
+- Status: **FIXED**. Not covered by a dedicated new test in this pass (no existing Playwright coverage visits the Team screen); `tsc --noEmit` and the corrected E2E mock shape are the verification for this pass. **Recommend adding a Team-screen E2E test in a follow-up.**
+
 ## 4a. Real browser E2E testing (this session)
 
 Per explicit request, this pass went further than static analysis: a real headless Chromium was obtained and run in this sandbox (no GUI, no root/apt), and a new Playwright suite was written and executed against the actual `expo export -p web` production build with the real Laravel API **mocked at the network layer** using response shapes read directly from the backend controllers (not guessed) — see `mobile/e2e/support/mock-api.ts` and `mobile/e2e/mocked-production-build.spec.ts`.
@@ -188,12 +194,21 @@ Per explicit request, a real Electron launch (not just the existing mocked `desk
 |---|---|---|---|
 | P0 | 4 | 4 (D-1, D-13, D-14, D-16) | 0 |
 | P1 | 7 | 7 (D-2, D-3, D-4, D-5, D-6, D-17, D-18) | 0 |
-| P2 | 4 | 2 (D-7 unit-level, D-15) | 2 (D-9, D-10) |
+| P2 | 5 | 3 (D-7 unit-level, D-15, D-19) | 2 (D-9, D-10) |
 | P3 | 2 | 1 (D-8) | 1 (D-11) |
 
 D-12 was an initial suspicion that turned out, on verification, not to be a real defect (see below) — it is not counted above.
 
 See TEST_REPORT.md for command-level verification of every "Status: FIXED" item above, and RELEASE_CHECKLIST.md / FLOW_MATRIX.md for the rest of the required documentation set.
+
+## 5a. Feature added this pass: Clients
+
+Per user request ("clients list... in left side menu... display old client list in project form"), a "Clients" feature was added:
+- `GET /api/clients` (`ClientController@index`) — distinct client names aggregated from `projects.client`, grouped with project counts, respecting the same `Project::visible($user)` role scoping as the project list.
+- New `mobile/app/(drawer)/clients.tsx` screen (drawer menu item, roles: founder/head/accounts) listing clients with counts; tapping one jumps to the Projects list pre-filtered to that client.
+- `projects/create.tsx` and `edit/[id].tsx` now source their client dropdown from this endpoint instead of deriving it client-side from a single (paginated, 50-item) `/projects` fetch — this also fixes an existing-but-undocumented gap where clients only present on projects past page 1 could silently never appear in the dropdown.
+
+**Deliberately not built:** a real `Clients` database table/model. `client` remains a free-text string on `projects` (see the AskUserQuestion decision in this session) — there is no dedupe, typo-correction, or rename-across-projects tooling. Two projects with "Acme Corp" vs "Acme corp." will show as two separate clients. If that becomes a real problem, the natural next step is a proper `clients` table with a `project.client_id` foreign key and a data-migration for existing rows.
 
 ## 6. Remaining Risks (honest, as of this pass)
 

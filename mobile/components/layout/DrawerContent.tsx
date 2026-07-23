@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { id: 'analytics',   route: '/(drawer)/analytics',       icon: '📊', label: 'Analytics',   roles: ['founder', 'hr'] },
   { id: 'projects',    route: '/(drawer)/projects',        icon: '📁', label: 'Projects',    roles: ['founder', 'head', 'member', 'accounts'] },
   { id: 'create_proj', route: '/(drawer)/projects/create', icon: '＋', label: 'New Project', roles: ['founder', 'head'] },
+  { id: 'clients',     route: '/(drawer)/clients',         icon: '🏢', label: 'Clients',     roles: ['founder', 'head', 'accounts'] },
   { id: 'attendance',  route: '/(drawer)/attendance',      icon: '📅', label: 'Attendance',  roles: ['founder', 'head', 'member', 'accounts'] },
   { id: 'leaves',      route: '/(drawer)/leaves',          icon: '🌿', label: 'Leaves',      roles: ['founder', 'head', 'member', 'accounts'] },
   { id: 'team',        route: '/(drawer)/team',            icon: '👥', label: 'Team',        roles: ['founder'] },

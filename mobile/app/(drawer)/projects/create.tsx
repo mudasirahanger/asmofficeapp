@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { projectService } from '../../../services/projectService';
 import { teamService } from '../../../services/teamService';
+import { clientService } from '../../../services/clientService';
 import { useAuthStore } from '../../../store/authStore';
 import { Card } from '../../../components/ui/Card';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -40,13 +41,15 @@ export default function CreateProjectScreen() {
   // Fetch lists for dropdowns
   const { data: deptData } = useQuery({ queryKey: ['departments'], queryFn: teamService.getDepartments });
   const { data: userData } = useQuery({ queryKey: ['users'], queryFn: teamService.getUsers });
-  const { data: projectData } = useQuery({ queryKey: ['projects'], queryFn: () => projectService.list() });
+  // Full list of known client names, not just whatever's on the first page
+  // of /projects (that page-1-only bug used to make some existing clients
+  // silently missing from this dropdown).
+  const { data: clientsData } = useQuery({ queryKey: ['clients'], queryFn: clientService.list });
 
   const depts = deptData?.departments || [];
   const users = userData?.users || [];
-  
-  const allClients = (projectData?.projects || []).map((p: any) => p.client).filter((c: string) => !!c);
-  const uniqueClients = Array.from(new Set(allClients)) as string[];
+
+  const uniqueClients = (clientsData?.clients || []).map((c) => c.name);
 
   const isFounder = user?.role === 'founder';
   const availableDepts = isFounder ? depts : depts.filter((d: any) => user?.departments?.some((ud: any) => ud.id === d.id));
@@ -59,6 +62,7 @@ export default function CreateProjectScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       router.replace('/(drawer)/projects');
     },
     onError: (err: any) => {

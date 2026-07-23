@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mockCoreApi, ACTIVE_PROJECT } from './support/mock-api';
+import { mockCoreApi, ACTIVE_PROJECT, CLIENT_SUMMARIES } from './support/mock-api';
 
 /**
  * E2E tests for the PRODUCTION `expo export -p web` output, run with the
@@ -142,6 +142,36 @@ test.describe('Production export — mocked API', () => {
     // Switching back to an existing client hides the free-text input again.
     await clientSelect.selectOption({ index: 0 });
     await expect(newClientInput).toBeHidden({ timeout: 3000 });
+  });
+
+  test('Clients menu item lists clients and jumps to their filtered project list', async ({ page }) => {
+    await mockCoreApi(page);
+    await page.goto('/');
+    await page.getByPlaceholder(/username/i).first().fill('mudasir');
+    await page.getByPlaceholder(/password/i).first().fill('mudasir123');
+    await page.getByText('Sign In →').first().click();
+    await expect(page.getByText(/active projects|welcome|dashboard/i).first()).toBeVisible({ timeout: 15000 });
+
+    await page.getByText('Clients', { exact: true }).first().click();
+
+    // Scoped via testID rather than getByText(clientName): the dashboard
+    // screen stays mounted-but-hidden behind the Clients screen (React
+    // Navigation keeps prior screens in the tree), and its ProjectCard also
+    // renders the same client name — an unscoped text match resolves to
+    // that hidden element instead of the visible row in the Clients table.
+    const clientRow = page.getByTestId(`client-row-${CLIENT_SUMMARIES[0].name}`);
+    await expect(clientRow).toBeVisible({ timeout: 10000 });
+    await expect(clientRow.getByText(`${CLIENT_SUMMARIES[0].total_projects} project`)).toBeVisible();
+
+    await clientRow.click();
+
+    // Landed on the Projects list with the search box pre-filled to this
+    // client's name, and the client's project is visible.
+    await expect(page).toHaveURL(/\/projects/);
+    await expect(page.getByPlaceholder(/search projects or clients/i)).toHaveValue(CLIENT_SUMMARIES[0].name);
+    // Scoped to the Projects list (testID="projects-list") rather than a
+    // bare text match — same hidden-dashboard-duplicate reason as above.
+    await expect(page.getByTestId('projects-list').getByText(ACTIVE_PROJECT.title).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('refreshing on a nested route does not blank-screen (SPA fallback)', async ({ page }) => {

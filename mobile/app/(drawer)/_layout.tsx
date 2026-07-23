@@ -35,6 +35,7 @@ export default function DrawerLayout() {
       <Drawer.Screen name="dashboard" />
       <Drawer.Screen name="analytics" />
       <Drawer.Screen name="projects" />
+      <Drawer.Screen name="clients" />
       <Drawer.Screen name="attendance" />
       <Drawer.Screen name="leaves" />
       <Drawer.Screen name="team" />

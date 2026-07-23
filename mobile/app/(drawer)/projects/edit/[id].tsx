@@ -8,6 +8,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { projectService } from '../../../../services/projectService';
 import { teamService } from '../../../../services/teamService';
+import { clientService } from '../../../../services/clientService';
 import { useAuthStore } from '../../../../store/authStore';
 import { Card } from '../../../../components/ui/Card';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -47,7 +48,7 @@ export default function EditProjectScreen() {
     queryFn: () => projectService.get(projectId),
     enabled: !!projectId 
   });
-  const { data: listData } = useQuery({ queryKey: ['projects'], queryFn: () => projectService.list() });
+  const { data: clientsData } = useQuery({ queryKey: ['clients'], queryFn: clientService.list });
 
   useEffect(() => {
     if (projectDataRes?.project) {
@@ -69,8 +70,7 @@ export default function EditProjectScreen() {
   const depts = deptData?.departments || [];
   const users = userData?.users || [];
   
-  const allClients = (listData?.projects || []).map((p: any) => p.client).filter((c: string) => !!c);
-  const uniqueClients = Array.from(new Set(allClients)) as string[];
+  const uniqueClients = (clientsData?.clients || []).map((c) => c.name);
 
   // Safety net: if the project's own client name isn't in the aggregate list
   // (e.g. it was the only project for that client and got excluded by a race
@@ -89,6 +89,7 @@ export default function EditProjectScreen() {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       router.replace(`/(drawer)/projects/${projectId}`);
     },
     onError: (err: any) => {

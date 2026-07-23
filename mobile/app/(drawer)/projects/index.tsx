@@ -4,7 +4,7 @@ import {
   TextInput, RefreshControl, useWindowDimensions, ScrollView,
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { useRouter, useNavigation } from 'expo-router';
+import { useRouter, useNavigation, useLocalSearchParams } from 'expo-router';
 import { DrawerActions } from '@react-navigation/routers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { projectService } from '../../../services/projectService';
@@ -25,14 +25,24 @@ const STATUS_FILTERS = [
 ];
 
 export default function ProjectsScreen() {
+  // Populated when arriving from the Clients screen (tapping a client jumps
+  // here pre-filtered to that client's projects, via the same title/client
+  // `search` the backend already supports).
+  const params = useLocalSearchParams<{ client?: string }>();
   const [status, setStatus]   = useState('all');
   const [dept, setDept]       = useState('all');
-  const [search, setSearch]   = useState('');
+  const [search, setSearch]   = useState(params.client ?? '');
   const { user }              = useAuthStore();
   const navigation            = useNavigation();
   const router                = useRouter();
   const { width }             = useWindowDimensions();
   const isDesktop             = width >= 768;
+
+  React.useEffect(() => {
+    if (params.client) {
+      setSearch(params.client);
+    }
+  }, [params.client]);
 
   const isFounder = user?.role === 'founder';
   const isHead    = user?.role === 'head';
@@ -145,6 +155,7 @@ export default function ProjectsScreen() {
         <EmptyState title="No projects found" subtitle="Try changing your filters" icon="📁" />
       ) : (
         <FlatList
+          testID="projects-list"
           data={projects}
           keyExtractor={(p) => String(p.id)}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}

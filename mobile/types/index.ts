@@ -62,6 +62,16 @@ export interface Project {
   progressUpdates?: ProgressUpdate[];
 }
 
+export interface ClientSummary {
+  name: string;
+  total_projects: number;
+  active_projects: number;
+  completed_projects: number;
+  billed_projects: number;
+  overdue_projects: number;
+  last_activity?: string;
+}
+
 export interface ProgressUpdate {
   id: number;
   project_id: number;
