@@ -14,6 +14,7 @@ class Project extends Model
         'title',
         'description',
         'client',
+        'client_id',
         'department_id',
         'assigned_to',
         'sub_assigned_to',
@@ -36,6 +37,7 @@ class Project extends Model
         'sub_assigned_to' => 'integer',
         'created_by'      => 'integer',
         'department_id'   => 'integer',
+        'client_id'       => 'integer',
         'invoice_data'    => 'array',
     ];
 
@@ -43,6 +45,16 @@ class Project extends Model
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    // Named clientRecord(), not client(): `client` is already a real string
+    // column (kept for backward compatibility — see Client::resolveForProject),
+    // and Eloquent's attribute accessor always wins over a same-named
+    // relation method when the column exists, so a client() method here
+    // would be silently unreachable via $project->client.
+    public function clientRecord()
+    {
+        return $this->belongsTo(Client::class, 'client_id');
     }
 
     public function assignedTo()

@@ -97,6 +97,36 @@ class ProjectControllerTest extends TestCase
             'title' => 'New Project',
             'created_by' => $user->id,
         ]);
+
+        // Client::resolveForProject find-or-creates a Client from the raw
+        // `client` string and links it via client_id.
+        $project = \App\Models\Project::where('title', 'New Project')->firstOrFail();
+        $this->assertNotNull($project->client_id);
+        $this->assertDatabaseHas('clients', ['id' => $project->client_id, 'name' => 'Acme Corp']);
+    }
+
+    public function test_creating_a_second_project_with_a_differently_cased_client_name_reuses_the_same_client()
+    {
+        $user = User::factory()->create(['role' => 'founder']);
+        $dept = Department::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/projects', [
+            'title' => 'First', 'client' => 'Acme Corp', 'department_id' => $dept->id,
+            'deadline' => now()->addDays(7)->toDateString(),
+        ])->assertStatus(201);
+
+        $this->postJson('/api/projects', [
+            'title' => 'Second', 'client' => '  acme corp  ', 'department_id' => $dept->id,
+            'deadline' => now()->addDays(7)->toDateString(),
+        ])->assertStatus(201);
+
+        $this->assertEquals(1, \App\Models\Client::count());
+        $first = \App\Models\Project::where('title', 'First')->firstOrFail();
+        $second = \App\Models\Project::where('title', 'Second')->firstOrFail();
+        $this->assertEquals($first->client_id, $second->client_id);
+        // Canonical casing from the first-created Client wins.
+        $this->assertEquals('Acme Corp', $second->client);
     }
 
     public function test_mark_billed()

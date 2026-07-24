@@ -163,7 +163,11 @@ test.describe('Production export — mocked API', () => {
     await expect(clientRow).toBeVisible({ timeout: 10000 });
     await expect(clientRow.getByText(`${CLIENT_SUMMARIES[0].total_projects} project`)).toBeVisible();
 
-    await clientRow.click();
+    // Click the name itself, not just anywhere in the row: only the
+    // name/count column is the tappable navigation target (the rest of the
+    // row holds stat text and, for founders, separate edit/delete buttons
+    // that must NOT also trigger navigation).
+    await clientRow.getByText(CLIENT_SUMMARIES[0].name, { exact: true }).click();
 
     // Landed on the Projects list with the search box pre-filled to this
     // client's name, and the client's project is visible.
@@ -172,6 +176,60 @@ test.describe('Production export — mocked API', () => {
     // Scoped to the Projects list (testID="projects-list") rather than a
     // bare text match — same hidden-dashboard-duplicate reason as above.
     await expect(page.getByTestId('projects-list').getByText(ACTIVE_PROJECT.title).first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test('Founder can rename a client from the Clients screen', async ({ page }) => {
+    await mockCoreApi(page);
+    await page.goto('/');
+    await page.getByPlaceholder(/username/i).first().fill('mudasir');
+    await page.getByPlaceholder(/password/i).first().fill('mudasir123');
+    await page.getByText('Sign In →').first().click();
+    await expect(page.getByText(/active projects|welcome|dashboard/i).first()).toBeVisible({ timeout: 15000 });
+
+    await page.getByText('Clients', { exact: true }).first().click();
+
+    const targetName = CLIENT_SUMMARIES[1].name; // 'Unlinked Co'
+    await page.getByTestId(`edit-client-${targetName}`).click();
+
+    const nameInput = page.getByTestId('client-modal-name-input');
+    await expect(nameInput).toHaveValue(targetName);
+    await nameInput.fill('Renamed Co');
+    await page.getByTestId('client-modal-save-btn').click();
+
+    // Modal closes and the row now shows the new name (list was
+    // invalidated/refetched after the PUT succeeded).
+    await expect(page.getByTestId('client-modal-name-input')).toBeHidden({ timeout: 5000 });
+    await expect(page.getByTestId('client-row-Renamed Co')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('Deleting a client is blocked while linked to a project, but works once unlinked (user-requested behavior)', async ({ page }) => {
+    await mockCoreApi(page);
+    await page.goto('/');
+    await page.getByPlaceholder(/username/i).first().fill('mudasir');
+    await page.getByPlaceholder(/password/i).first().fill('mudasir123');
+    await page.getByText('Sign In →').first().click();
+    await expect(page.getByText(/active projects|welcome|dashboard/i).first()).toBeVisible({ timeout: 15000 });
+
+    await page.getByText('Clients', { exact: true }).first().click();
+
+    // Accept the window.confirm("Delete...?") and any window.alert(...)
+    // this flow triggers, for both attempts below.
+    page.on('dialog', (dialog) => dialog.accept());
+
+    // CLIENT_SUMMARIES[0] ('Internal') is linked to ACTIVE_PROJECT — the
+    // mock's DELETE handler mirrors ClientController@destroy and returns
+    // 409, so the row must still be there afterward.
+    const linkedName = CLIENT_SUMMARIES[0].name;
+    await expect(page.getByTestId(`client-row-${linkedName}`)).toBeVisible({ timeout: 10000 });
+    await page.getByTestId(`delete-client-${linkedName}`).click();
+    await expect(page.getByTestId(`client-row-${linkedName}`)).toBeVisible({ timeout: 5000 });
+
+    // CLIENT_SUMMARIES[1] ('Unlinked Co') has zero projects — delete
+    // actually succeeds and the row disappears from the list.
+    const unlinkedName = CLIENT_SUMMARIES[1].name;
+    await expect(page.getByTestId(`client-row-${unlinkedName}`)).toBeVisible({ timeout: 10000 });
+    await page.getByTestId(`delete-client-${unlinkedName}`).click();
+    await expect(page.getByTestId(`client-row-${unlinkedName}`)).toBeHidden({ timeout: 5000 });
   });
 
   test('refreshing on a nested route does not blank-screen (SPA fallback)', async ({ page }) => {

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\Client;
 use App\Models\Project;
 use App\Models\ProgressUpdate;
 use App\Models\Attendance;
@@ -87,7 +88,8 @@ class SyncService
                     throw new \Exception('Unauthorized for this department');
                 }
                 
-                $safePayload = \Illuminate\Support\Arr::only($payload, ['title', 'description', 'client', 'department_id', 'assigned_to', 'deadline', 'priority', 'notes']);
+                $safePayload = \Illuminate\Support\Arr::only($payload, ['title', 'description', 'client', 'client_id', 'department_id', 'assigned_to', 'deadline', 'priority', 'notes']);
+                $safePayload = Client::resolveForProject($safePayload);
 
                 return Project::create(array_merge($safePayload, ['created_by' => $user->id, 'server_version' => 1, 'status' => 'assigned']));
 

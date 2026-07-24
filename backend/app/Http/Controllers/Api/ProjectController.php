@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\Project;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -65,6 +66,7 @@ class ProjectController extends Controller
             'title'         => 'required|string|max:255',
             'description'   => 'nullable|string',
             'client'        => 'nullable|string|max:255',
+            'client_id'     => 'nullable|exists:clients,id',
             'department_id' => 'required|exists:departments,id',
             'assigned_to'   => 'nullable|exists:users,id',
             'deadline'      => 'required|date',
@@ -79,6 +81,11 @@ class ProjectController extends Controller
                 return response()->json(['message' => 'Unauthorized for this department'], 403);
             }
         }
+
+        // Find-or-create the Client from client_id (preferred) or a raw
+        // `client` string (back-compat), keeping the denormalized `client`
+        // column in sync with the resolved Client's canonical name.
+        $data = Client::resolveForProject($data);
 
         $project = Project::create(array_merge($data, [
             'created_by'     => $user->id,
@@ -127,6 +134,7 @@ class ProjectController extends Controller
             'title'         => 'sometimes|string|max:255',
             'description'   => 'nullable|string',
             'client'        => 'nullable|string|max:255',
+            'client_id'     => 'nullable|exists:clients,id',
             'department_id' => 'sometimes|exists:departments,id',
             'assigned_to'   => 'nullable|exists:users,id',
             'deadline'      => 'sometimes|date',
@@ -142,6 +150,10 @@ class ProjectController extends Controller
             if (isset($data['department_id']) && !in_array($data['department_id'], $user->getDepartmentIds())) {
                 return response()->json(['message' => 'Cannot change to a department you do not manage'], 403);
             }
+        }
+
+        if (array_key_exists('client_id', $data) || array_key_exists('client', $data)) {
+            $data = Client::resolveForProject($data);
         }
 
         $oldAssignedTo    = $project->assigned_to;

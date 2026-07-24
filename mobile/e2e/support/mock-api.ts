@@ -47,6 +47,7 @@ export const ACTIVE_PROJECT = {
 
 export const CLIENT_SUMMARIES = [
   {
+    id: 201,
     name: 'Internal',
     total_projects: 1,
     active_projects: 1,
@@ -54,6 +55,16 @@ export const CLIENT_SUMMARIES = [
     billed_projects: 0,
     overdue_projects: 0,
     last_activity: '2026-07-20T00:00:00.000000Z',
+  },
+  {
+    id: 202,
+    name: 'Unlinked Co',
+    total_projects: 0,
+    active_projects: 0,
+    completed_projects: 0,
+    billed_projects: 0,
+    overdue_projects: 0,
+    last_activity: null as string | null,
   },
 ];
 
@@ -102,9 +113,47 @@ export async function mockCoreApi(page: Page, opts: { loginShouldFail?: boolean 
   await page.route('**/api/users', (route) => json(route, [FOUNDER_USER]));
   await page.route('**/api/departments', (route) => json(route, [{ id: 1, name: 'Engineering' }]));
 
-  // ClientController@index (backend/app/Http/Controllers/Api/ClientController.php)
-  // — { clients: [...] }, one entry per distinct Project.client value.
-  await page.route('**/api/clients', (route) => json(route, { clients: CLIENT_SUMMARIES }));
+  // ClientController (backend/app/Http/Controllers/Api/ClientController.php)
+  // — full CRUD, stateful across requests within a test so a
+  // rename/delete's cache-invalidated refetch shows the real effect.
+  let clientsState = CLIENT_SUMMARIES.map((c) => ({ ...c }));
+  let nextClientId = 900;
+
+  await page.route(/\/api\/clients(\/\d+)?$/, (route) => {
+    const method = route.request().method();
+    const idMatch = route.request().url().match(/\/api\/clients\/(\d+)/);
+    const id = idMatch ? Number(idMatch[1]) : null;
+
+    if (method === 'GET') {
+      return json(route, { clients: clientsState });
+    }
+    if (method === 'POST') {
+      const body = route.request().postDataJSON();
+      const newClient = {
+        id: ++nextClientId,
+        name: body.name,
+        total_projects: 0, active_projects: 0, completed_projects: 0, billed_projects: 0, overdue_projects: 0,
+        last_activity: null,
+      };
+      clientsState.push(newClient);
+      return json(route, { client: newClient }, 201);
+    }
+    if (method === 'PUT' && id != null) {
+      const body = route.request().postDataJSON();
+      clientsState = clientsState.map((c) => (c.id === id ? { ...c, name: body.name } : c));
+      return json(route, { client: clientsState.find((c) => c.id === id) });
+    }
+    if (method === 'DELETE' && id != null) {
+      const client = clientsState.find((c) => c.id === id);
+      // Mirrors ClientController@destroy: refuse if any project references it.
+      if (client && client.total_projects > 0) {
+        return json(route, { message: 'This client is linked to one or more projects and cannot be deleted.' }, 409);
+      }
+      clientsState = clientsState.filter((c) => c.id !== id);
+      return json(route, { message: 'Client deleted.' });
+    }
+    return json(route, { message: `Unhandled ${method} in e2e mock` }, 500);
+  });
 
   // Regex, not a glob string: the Projects list screen calls this with
   // ?status=&dept=&search= query params (e.g. when arriving pre-filtered

@@ -122,6 +122,18 @@ npx playwright test --config=e2e/mocked.playwright.config.ts --reporter=list
 
 `desktop/www` was resynced from the fresh `mobile/dist` build so the packaged Electron app also ships this fix once rebuilt.
 
+## Client management upgrade (2026-07-24, same-day follow-up)
+
+Per user request, upgraded the Clients feature from a derived-string list to a real `clients` table with rename/delete (delete blocked with 409 while linked to any project — see PRODUCTION_AUDIT.md 5a). Verified in this sandbox:
+```
+cd mobile && npx tsc --noEmit            # clean, 0 errors
+cd mobile && npx jest --silent           # 4 suites, 17 tests passed
+cd mobile && npx expo export -p web --output-dir dist   # clean build
+npx playwright test --config=e2e/mocked.playwright.config.ts --reporter=list
+#  8 passed (2 new: rename flow, blocked/successful delete flow)
+```
+`backend/database/migrations/2026_07_24_*`, `backend/app/Models/Client.php`, and the extended `ClientControllerTest.php`/`ProjectControllerTest.php` cases were **not executed** — PHP still unavailable in this sandbox. **This migration includes a one-time data backfill touching every existing project row — back up the database and run `php artisan migrate --force` before this feature will work in production** (see RELEASE_CHECKLIST.md). `desktop/www` was resynced from the fresh build.
+
 ## Summary
 
 - **Fixed and verified with actual command output in this session:** D-1 (debug scripts removed), D-3/D-7 (desktop navigation hardening + Jest tests passing), D-5/D-6 (lockfile/cross-platform script — reviewed, not independently re-run beyond the scripts existing correctly), D-8, D-13 (Jest suite unblocked), D-14 (ProjectCard crash fix, verified via clean `tsc`+`jest`), D-15 (all 31 tsc errors resolved to 0).

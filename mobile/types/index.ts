@@ -39,6 +39,7 @@ export interface Project {
   title: string;
   description?: string;
   client?: string;
+  client_id?: number;
   department_id?: number;
   assigned_to?: number;
   sub_assigned_to?: number;
@@ -63,6 +64,7 @@ export interface Project {
 }
 
 export interface ClientSummary {
+  id: number;
   name: string;
   total_projects: number;
   active_projects: number;
@@ -70,6 +72,13 @@ export interface ClientSummary {
   billed_projects: number;
   overdue_projects: number;
   last_activity?: string;
+}
+
+export interface Client {
+  id: number;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ProgressUpdate {
@@ -205,6 +214,7 @@ export interface CreateProjectForm {
   title: string;
   description?: string;
   client?: string;
+  client_id?: number;
   department_id?: number;
   assigned_to?: number;
   deadline: string;

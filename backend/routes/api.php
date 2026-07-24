@@ -49,8 +49,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::patch ('/projects/{project}/deadline',   [ProjectController::class, 'changeDeadline']);
     Route::patch ('/projects/{project}/sub-assign', [ProjectController::class, 'subAssign']);
 
-    // Clients (derived from distinct Project.client values — no separate table)
-    Route::get ('/clients', [ClientController::class, 'index']);
+    // Clients
+    Route::get   ('/clients',            [ClientController::class, 'index']);
+    Route::post  ('/clients',            [ClientController::class, 'store']);
+    Route::put   ('/clients/{client}',   [ClientController::class, 'update']);
+    Route::delete('/clients/{client}',   [ClientController::class, 'destroy']);
 
     // Progress Updates
     Route::get  ('/projects/{project}/progress', [ProgressController::class, 'index']);

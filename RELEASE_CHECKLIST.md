@@ -19,6 +19,7 @@ Use this for every release. Items marked (manual) require a human decision; item
 
 - [ ] `composer install --no-dev --optimize-autoloader` (cmd, production).
 - [ ] Review pending migrations: `php artisan migrate:status` (cmd). Never run `migrate:fresh`/`migrate:refresh` against a production database.
+- [ ] **Back up the database before this specific release**: `2026_07_24_000002_add_client_id_to_projects_table` does a one-time data backfill (creates a `clients` row per distinct existing `projects.client` string, merging case/whitespace variants into one canonical client, then links every project's new `client_id`). Like any migration, Laravel's `migrations` table prevents it from re-running automatically — but it is **not** safe to manually re-run against an already-migrated database (it would create duplicate `clients` rows), so don't roll it back and reapply casually. Back up first regardless, since it touches every existing project row.
 - [ ] `php artisan migrate --force` (cmd, production only, after a DB backup).
 - [ ] Confirm `.env` in production has `APP_ENV=production`, `APP_DEBUG=false`, a real `APP_KEY`, and correct `SANCTUM_STATEFUL_DOMAINS`/CORS origins for the actual deployed frontend domain(s).
 - [ ] Confirm the web server document root is `backend/public` — **not** `backend/`. (This is the exact condition that made D-1's debug scripts a real exposure risk.)
